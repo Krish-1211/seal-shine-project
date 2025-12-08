@@ -1,9 +1,9 @@
 import { toast } from "sonner";
 
 export const SHOPIFY_API_VERSION = '2025-07';
-export const SHOPIFY_STORE_PERMANENT_DOMAIN = 'lovable-project-yseeg.myshopify.com';
+export const SHOPIFY_STORE_PERMANENT_DOMAIN = 'xkrfb7-ti.myshopify.com';
 export const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY_STORE_PERMANENT_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
-export const SHOPIFY_STOREFRONT_TOKEN = 'ecd0fc70d5c766c97d3db87e5aaaea1b';
+export const SHOPIFY_STOREFRONT_TOKEN = '24be3faff1774ac83c11ae010240fc85';
 
 export interface ShopifyProduct {
   node: {
@@ -11,6 +11,7 @@ export interface ShopifyProduct {
     title: string;
     description: string;
     handle: string;
+    category?: string;
     priceRange: {
       minVariantPrice: {
         amount: string;
@@ -30,6 +31,7 @@ export interface ShopifyProduct {
         node: {
           id: string;
           title: string;
+          sku?: string;
           price: {
             amount: string;
             currencyCode: string;
@@ -168,7 +170,7 @@ export async function storefrontApiRequest(query: string, variables: any = {}) {
   }
 
   const data = await response.json();
-  
+
   if (data.errors) {
     throw new Error(`Error calling Shopify: ${data.errors.map((e: any) => e.message).join(', ')}`);
   }
@@ -192,7 +194,7 @@ export async function createStorefrontCheckout(items: any[]): Promise<string> {
     }
 
     const cart = cartData.data.cartCreate.cart;
-    
+
     if (!cart.checkoutUrl) {
       throw new Error('No checkout URL returned from Shopify');
     }

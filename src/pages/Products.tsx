@@ -132,14 +132,14 @@ const Products = () => {
                         >
                             All Products
                         </Button>
-                        {SITE_CONTENT.surfaces.map((surface) => (
+                        {SITE_CONTENT.categories.map((category) => (
                             <Button
-                                key={surface.name}
-                                variant={categoryFilter === surface.name ? "default" : "outline"}
-                                onClick={() => setSearchParams({ category: surface.name })}
+                                key={category.name}
+                                variant={categoryFilter === category.name ? "default" : "outline"}
+                                onClick={() => setSearchParams({ category: category.name })}
                                 className="whitespace-nowrap"
                             >
-                                {surface.name}
+                                {category.name}
                             </Button>
                         ))}
                     </div>
@@ -153,7 +153,7 @@ const Products = () => {
                                         <img
                                             src={product.image}
                                             alt={product.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                                         />
                                         <Badge className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground hover:bg-background/90">
                                             {product.category}
@@ -168,6 +168,15 @@ const Products = () => {
                                         <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
                                             {product.description}
                                         </p>
+                                        {product.sizes && (
+                                            <div className="flex flex-wrap gap-1 mb-4">
+                                                {product.sizes.map(size => (
+                                                    <Badge key={size} variant="secondary" className="text-xs">
+                                                        {size}
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        )}
                                         <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
                                             <span className="text-lg font-bold text-primary">
                                                 ${product.price.toFixed(2)}

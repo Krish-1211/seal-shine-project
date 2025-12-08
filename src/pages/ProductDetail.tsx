@@ -1,80 +1,38 @@
 import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, ShieldCheck, Minus, Plus } from "lucide-react";
 import { CartDrawer } from "@/components/CartDrawer";
-import { storefrontApiRequest, ShopifyProduct } from "@/lib/shopify";
+import { ShopifyProduct } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+import { useShopifyProduct } from "@/hooks/useShopify";
 import { useState } from "react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { MOCK_PRODUCTS } from "@/lib/mockData";
 
-const PRODUCT_QUERY = `
-  query GetProduct($handle: String!) {
-    product(handle: $handle) {
-      id
-      title
-      description
-      handle
-      priceRange {
-        minVariantPrice {
-          amount
-          currencyCode
-        }
-      }
-      images(first: 5) {
-        edges {
-          node {
-            url
-            altText
-          }
-        }
-      }
-      variants(first: 10) {
-        edges {
-          node {
-            id
-            title
-            price {
-              amount
-              currencyCode
-            }
-            availableForSale
-            selectedOptions {
-              name
-              value
-            }
-          }
-        }
-      }
-      options {
-        name
-        values
-      }
-    }
-  }
-`;
+
 
 const ProductDetail = () => {
   const { handle } = useParams();
   const [quantity, setQuantity] = useState(1);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const addItem = useCartStore(state => state.addItem);
-  
-  const { data: productData, isLoading } = useQuery({
-    queryKey: ['product', handle],
-    queryFn: async () => {
-      const result = await storefrontApiRequest(PRODUCT_QUERY, { handle });
-      return result.data.product;
-    },
-    enabled: !!handle,
-  });
+
+  const { data: productData, isLoading } = useShopifyProduct(handle || "");
 
   const handleAddToCart = () => {
     if (!productData) return;
-    
+
     const variant = productData.variants.edges[selectedVariantIndex]?.node;
     if (!variant) return;
 
@@ -90,7 +48,7 @@ const ProductDetail = () => {
       quantity,
       selectedOptions: variant.selectedOptions || []
     };
-    
+
     addItem(cartItem);
     toast.success("Added to cart", {
       description: `${productData.title} x ${quantity}`,
@@ -125,6 +83,12 @@ const ProductDetail = () => {
   const currentVariant = productData.variants.edges[selectedVariantIndex]?.node;
   const mainImage = productData.images.edges[0]?.node;
 
+  const mockProduct = MOCK_PRODUCTS.find(p =>
+    p.codes.includes(currentVariant?.sku || "") ||
+    p.title === productData.title // Fallback to title match if SKU missing
+  );
+  const technicalData = mockProduct?.technicalData;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -150,15 +114,46 @@ const ProductDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Image */}
           <div className="space-y-4">
-            <div className="aspect-square overflow-hidden rounded-lg bg-muted">
-              {mainImage && (
-                <img 
-                  src={mainImage.url} 
-                  alt={mainImage.altText || productData.title}
-                  className="w-full h-full object-cover"
-                />
+            <Carousel className="w-full max-w-md mx-auto">
+              <CarouselContent>
+                {productData.images.edges.map((image, index) => (
+                  <CarouselItem key={index}>
+                    <div className="aspect-square overflow-hidden rounded-lg bg-muted p-2">
+                      <img
+                        src={image.node.url}
+                        alt={image.node.altText || productData.title}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {productData.images.edges.length > 1 && (
+                <>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </>
               )}
-            </div>
+            </Carousel>
+
+            {/* Technical Data */}
+            {technicalData && (
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="font-semibold mb-4">Technical Data</h3>
+                  <a
+                    href={technicalData}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="outline" className="w-full sm:w-auto">
+                      <ShieldCheck className="w-4 h-4 mr-2" />
+                      Technical Data Sheet (PDF)
+                    </Button>
+                  </a>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Product Info */}
@@ -170,6 +165,9 @@ const ProductDetail = () => {
                 ${parseFloat(currentVariant?.price.amount || '0').toFixed(2)} {currentVariant?.price.currencyCode}
               </p>
               <p className="text-sm text-muted-foreground mt-1">GST inclusive</p>
+              {currentVariant?.sku && (
+                <p className="text-sm font-medium mt-2">Item Code: {currentVariant.sku}</p>
+              )}
             </div>
 
             <Separator />
@@ -222,8 +220,8 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="w-full bg-secondary hover:bg-secondary/90"
               onClick={handleAddToCart}
             >

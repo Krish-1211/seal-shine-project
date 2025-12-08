@@ -7,11 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShoppingCart } from "lucide-react";
-import { MOCK_PRODUCTS, SITE_CONTENT } from "@/lib/mockData";
+import { Search, ShoppingCart, Loader2 } from "lucide-react";
+import { SITE_CONTENT } from "@/lib/mockData";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { ShopifyProduct } from "@/lib/shopify";
+import { useShopifyProducts } from "@/hooks/useShopify";
 
 
 
@@ -21,62 +22,37 @@ const Index = () => {
   const searchQuery = searchParams.get("search") || "";
   const addItem = useCartStore(state => state.addItem);
 
+  const { data: products, isLoading, error } = useShopifyProducts();
+
   const filteredProducts = useMemo(() => {
-    return MOCK_PRODUCTS.filter(product => {
+    if (!products) return [];
+    return products.filter(product => {
       const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.description.toLowerCase().includes(searchQuery.toLowerCase());
+      // Note: Shopify demo products might not have 'category' field in the same way. 
+      // For now, we'll filter by product type if available, or just ignore category filter for demo.
+      // In a real app, you'd map Shopify 'productType' or tags to your categories.
       const matchesCategory = categoryFilter ? product.category === categoryFilter : true;
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, categoryFilter]);
+  }, [products, searchQuery, categoryFilter]);
 
-  const handleAddToCart = (product: typeof MOCK_PRODUCTS[0]) => {
-    // Convert mock product to ShopifyProduct structure for the store
-    const shopifyProduct: ShopifyProduct = {
-      node: {
-        id: product.id,
-        title: product.title,
-        description: product.description,
-        handle: product.title.toLowerCase().replace(/\s+/g, '-'),
-        priceRange: {
-          minVariantPrice: {
-            amount: product.price.toString(),
-            currencyCode: "AUD"
-          }
-        },
-        images: {
-          edges: [{
-            node: {
-              url: product.image,
-              altText: product.title
-            }
-          }]
-        },
-        variants: {
-          edges: [{
-            node: {
-              id: product.id,
-              title: "Default Title",
-              price: {
-                amount: product.price.toString(),
-                currencyCode: "AUD"
-              },
-              availableForSale: true,
-              selectedOptions: []
-            }
-          }]
-        },
-        options: []
-      }
-    };
+  const handleAddToCart = (product: ShopifyProduct["node"]) => {
+    // Map the Shopify product node to the structure expected by the cart
+    // The hook returns the 'node' directly, so we wrap it back if needed or adjust the cart store.
+    // Looking at cartStore, it expects { product: ShopifyProduct, ... }
+    // But ShopifyProduct interface in shopify.ts is { node: { ... } }
+    // Let's construct the object the cart expects.
+
+    const cartItemProduct: ShopifyProduct = { node: product };
 
     const cartItem = {
-      product: shopifyProduct,
-      variantId: product.id,
-      variantTitle: "Default Title",
+      product: cartItemProduct,
+      variantId: product.variants.edges[0]?.node.id, // Default to first variant
+      variantTitle: product.variants.edges[0]?.node.title,
       price: {
-        amount: product.price.toString(),
-        currencyCode: "AUD"
+        amount: product.priceRange.minVariantPrice.amount,
+        currencyCode: product.priceRange.minVariantPrice.currencyCode
       },
       quantity: 1,
       selectedOptions: []
@@ -130,35 +106,43 @@ const Index = () => {
             >
               All Products
             </Button>
-            {SITE_CONTENT.surfaces.map((surface) => (
+            {SITE_CONTENT.categories.map((category) => (
               <Button
-                key={surface.name}
-                variant={categoryFilter === surface.name ? "default" : "outline"}
-                onClick={() => setSearchParams({ category: surface.name })}
+                key={category.name}
+                variant={categoryFilter === category.name ? "default" : "outline"}
+                onClick={() => setSearchParams({ category: category.name })}
                 className="whitespace-nowrap"
               >
-                {surface.name}
+                {category.name}
               </Button>
             ))}
           </div>
 
           {/* Product Grid */}
-          {filteredProducts.length > 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center py-24">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-24">
+              <p className="text-red-500">Failed to load products. Please try again later.</p>
+            </div>
+          ) : filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {filteredProducts.map((product) => (
                 <Card key={product.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col">
                   <div className="aspect-square bg-muted relative overflow-hidden">
                     <img
-                      src={product.image}
-                      alt={product.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      src={product.images.edges[0]?.node.url || "/placeholder.svg"}
+                      alt={product.images.edges[0]?.node.altText || product.title}
+                      className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                     />
-                    <Badge className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground hover:bg-background/90">
-                      {product.category}
-                    </Badge>
+                    {/* <Badge className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground hover:bg-background/90">
+                      {product.productType}
+                    </Badge> */}
                   </div>
                   <CardContent className="p-4 flex flex-col flex-1">
-                    <Link to={`/product/${product.id}`} className="block mb-2">
+                    <Link to={`/product/${product.handle}`} className="block mb-2">
                       <h3 className="font-semibold text-lg group-hover:text-secondary transition-colors line-clamp-1">
                         {product.title}
                       </h3>
@@ -168,7 +152,7 @@ const Index = () => {
                     </p>
                     <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
                       <span className="text-lg font-bold text-primary">
-                        ${product.price.toFixed(2)}
+                        ${parseFloat(product.priceRange.minVariantPrice.amount).toFixed(2)}
                       </span>
                       <Button size="sm" onClick={() => handleAddToCart(product)}>
                         <ShoppingCart className="w-4 h-4 mr-2" />

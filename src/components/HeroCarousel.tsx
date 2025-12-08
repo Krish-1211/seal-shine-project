@@ -18,20 +18,25 @@ export const HeroCarousel = () => {
     );
 
     return (
-        <div className="w-full bg-muted/30 py-8">
-            <div className="container mx-auto px-4">
+        <div className="w-full bg-muted/30 py-0 overflow-hidden">
+            <div className="w-full">
                 <Carousel
                     plugins={[plugin.current]}
-                    className="w-full max-w-5xl mx-auto"
+                    className="w-full"
                     onMouseEnter={plugin.current.stop}
                     onMouseLeave={plugin.current.reset}
+                    opts={{
+                        loop: true,
+                        align: "start",
+                        skipSnaps: false,
+                    }}
                 >
-                    <CarouselContent>
+                    <CarouselContent className="-ml-0">
                         {SITE_CONTENT.offers.map((offer) => (
-                            <CarouselItem key={offer.id}>
-                                <div className="p-1">
-                                    <Card className="border-none shadow-lg bg-gradient-to-r from-primary/90 to-primary text-primary-foreground overflow-hidden">
-                                        <CardContent className="flex flex-col md:flex-row items-center p-6 md:p-10 gap-6">
+                            <CarouselItem key={offer.id} className="pl-0 basis-full">
+                                <div className="p-0 h-full">
+                                    <Card className="border-none shadow-lg bg-gradient-to-r from-primary/90 to-primary text-primary-foreground overflow-hidden h-[500px] rounded-none">
+                                        <CardContent className="flex flex-col md:flex-row items-center p-6 md:p-10 gap-6 h-full">
                                             <div className="flex-1 space-y-4 text-center md:text-left">
                                                 <Badge variant="secondary" className="mb-2">
                                                     Special Offer
@@ -63,8 +68,8 @@ export const HeroCarousel = () => {
                             </CarouselItem>
                         ))}
                     </CarouselContent>
-                    <CarouselPrevious className="hidden md:flex" />
-                    <CarouselNext className="hidden md:flex" />
+                    <CarouselPrevious className="hidden md:flex left-4" />
+                    <CarouselNext className="hidden md:flex right-4" />
                 </Carousel>
             </div>
         </div>
