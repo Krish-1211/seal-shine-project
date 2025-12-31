@@ -6,19 +6,11 @@ export const useShopifyProducts = () => {
     queryKey: ["shopify-products"],
     queryFn: async () => {
       const shopDomain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN || "suresealsealants-2.myshopify.com";
-      const storefrontToken = import.meta.env.VITE_SHOPIFY_STOREFRONT_TOKEN;
-
-      if (!storefrontToken) {
-        console.error("❌ Missing VITE_SHOPIFY_STOREFRONT_TOKEN. Products cannot be fetched.");
-        // We can't fetch without a token, so return empty to avoid 403 spam
-        return [];
-      }
 
       const response = await fetch(`https://${shopDomain}/api/2024-01/graphql.json`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "X-Shopify-Storefront-Access-Token": storefrontToken
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           query: STOREFRONT_QUERY,
@@ -46,6 +38,7 @@ export const useShopifyProduct = (handle: string) => {
   return useQuery({
     queryKey: ["shopify-product", handle],
     queryFn: async () => {
+      const shopDomain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN || "suresealsealants-2.myshopify.com";
       const query = `
         query GetProduct($handle: String!) {
           productByHandle(handle: $handle) {
@@ -93,7 +86,27 @@ export const useShopifyProduct = (handle: string) => {
           }
         }
       `;
-      const data = await storefrontApiRequest(query, { handle });
+
+      const response = await fetch(`https://${shopDomain}/api/2024-01/graphql.json`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          query,
+          variables: { handle }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Shopify API failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.errors) {
+        throw new Error(data.errors[0].message);
+      }
+
       return data.data.productByHandle as ShopifyProduct["node"];
     },
     enabled: !!handle,
