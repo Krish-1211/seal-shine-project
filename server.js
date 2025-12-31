@@ -164,6 +164,44 @@ app.get("/api/admin/dashboard-stats", async (req, res) => {
     }
 });
 
+// TEMP DEBUG
+app.get("/api/debug/token", async (req, res) => {
+    try {
+        const accessToken = getShopifyAccessToken();
+        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "suresealsealants-2.myshopify.com";
+
+        // Create token
+        const response = await axios.post(`https://${shop}/admin/api/2024-01/storefront_access_tokens.json`, {
+            storefront_access_token: {
+                title: "Seal Shine Auto Generated",
+                access_scope: "unauthenticated_read_product_listings,unauthenticated_read_products"
+            }
+        }, {
+            headers: {
+                "X-Shopify-Access-Token": accessToken,
+                "Content-Type": "application/json"
+            }
+        });
+
+        res.json(response.data);
+    } catch (e) {
+        // If create fails (maybe already exists?), list them
+        try {
+            const accessToken = getShopifyAccessToken();
+            const shop = process.env.SHOPIFY_SHOP_DOMAIN || "suresealsealants-2.myshopify.com";
+            const listRes = await axios.get(`https://${shop}/admin/api/2024-01/storefront_access_tokens.json`, {
+                headers: {
+                    "X-Shopify-Access-Token": accessToken,
+                    "Content-Type": "application/json"
+                }
+            });
+            res.json(listRes.data);
+        } catch (err2) {
+            res.status(500).json({ error: e.message, error2: err2.message });
+        }
+    }
+});
+
 // Redirect root to frontend
 app.get('/', (req, res) => {
     res.redirect(FRONTEND_URL);
