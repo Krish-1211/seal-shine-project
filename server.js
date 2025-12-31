@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -14,7 +15,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:8080';
+
+app.use(cors({
+    origin: [FRONTEND_URL, 'https://seal-shine-frontend.onrender.com', 'http://localhost:8080'],
+    credentials: true
+}));
 app.use(cookieParser());
+app.use(express.json());
 
 import { startShopifyOAuth, shopifyOAuthCallback } from "./backend/shopifyAuth.js";
 
@@ -30,7 +39,19 @@ const TOKEN_PATH = path.join(__dirname, '.shopify_token');
 
 // Register OAuth routes
 app.get("/auth/shopify", startShopifyOAuth);
-app.get("/auth/callback", shopifyOAuthCallback);
+// app.get("/auth/callback", shopifyOAuthCallback); // Moved logic to allow redirection
+
+app.get("/auth/callback", async (req, res) => {
+    // Custom wrapper to handle redirect after callback
+    await shopifyOAuthCallback(req, res, (success) => {
+        if (success) {
+            res.redirect(`${FRONTEND_URL}/admin/dashboard`);
+        } else {
+            res.redirect(`${FRONTEND_URL}/admin/dashboard?error=auth_failed`);
+        }
+    });
+});
+
 
 // Proxy endpoints for Admin API
 import { getShopifyAccessToken } from "./backend/shopifyAuth.js";

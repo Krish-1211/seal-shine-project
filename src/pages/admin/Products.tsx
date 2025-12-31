@@ -14,12 +14,14 @@ import { toast } from "sonner";
 import axios from "axios";
 
 const Products = () => {
+    const API_URL = import.meta.env.VITE_API_URL || '';
+
     const { data: products, isLoading, isError } = useQuery({
         queryKey: ["admin-products"],
         queryFn: async () => {
             try {
                 // Fetch from our backend proxy which uses Shopify Admin API
-                const response = await axios.get("/api/admin/products");
+                const response = await axios.get(`${API_URL}/api/admin/products`);
                 return response.data.products || [];
             } catch (error) {
                 console.error("Failed to fetch products:", error);

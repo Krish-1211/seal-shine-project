@@ -15,11 +15,13 @@ const dummyChartData = [
 ];
 
 const Dashboard = () => {
+    const API_URL = import.meta.env.VITE_API_URL || '';
+
     const { data: stats, isLoading, isError } = useQuery({
         queryKey: ["admin-dashboard-stats"],
         queryFn: async () => {
             try {
-                const response = await axios.get("/api/admin/dashboard-stats");
+                const response = await axios.get(`${API_URL}/api/admin/dashboard-stats`);
                 return response.data;
             } catch (error) {
                 if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -45,7 +47,10 @@ const Dashboard = () => {
                 </p>
                 <Button
                     variant="default"
-                    onClick={() => window.location.href = "/auth/shopify?shop=suresealsealants-2.myshopify.com"}
+                    onClick={() => {
+                        const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || '';
+                        window.location.href = `${backendUrl}/auth/shopify?shop=suresealsealants-2.myshopify.com`;
+                    }}
                 >
                     Connect Shopify
                 </Button>

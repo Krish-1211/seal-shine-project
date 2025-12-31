@@ -32,10 +32,12 @@ export const startShopifyOAuth = (req, res) => {
     res.redirect(installUrl);
 };
 
-export const shopifyOAuthCallback = async (req, res) => {
+export const shopifyOAuthCallback = async (req, res, next) => {
     const { shop, code } = req.query;
 
     if (!code || !shop) {
+        console.error("Missing code or shop");
+        if (next) return next(false);
         return res.status(400).send("Missing code or shop parameter");
     }
 
@@ -59,13 +61,16 @@ export const shopifyOAuthCallback = async (req, res) => {
             shopifyAccessToken = data.access_token;
             fs.writeFileSync(TOKEN_PATH, shopifyAccessToken);
             console.log("Shopify OAuth token stored successfully to", TOKEN_PATH);
+            if (next) return next(true);
             res.send("Shopify connected successfully. You can close this tab and return to the dashboard.");
         } else {
             console.error("Failed to get access token:", data);
+            if (next) return next(false);
             res.status(500).send("Failed to get access token");
         }
     } catch (error) {
         console.error("Error exchanging code for token:", error);
+        if (next) return next(false);
         res.status(500).send("Internal Server Error");
     }
 };

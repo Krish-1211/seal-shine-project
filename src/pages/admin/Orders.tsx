@@ -15,11 +15,13 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 
 const Orders = () => {
+    const API_URL = import.meta.env.VITE_API_URL || '';
+
     const { data: orders, isLoading, isError } = useQuery({
         queryKey: ["admin-orders"],
         queryFn: async () => {
             try {
-                const response = await axios.get("/api/admin/orders");
+                const response = await axios.get(`${API_URL}/api/admin/orders`);
                 return response.data.orders || [];
             } catch (error) {
                 console.error("Failed to fetch orders:", error);

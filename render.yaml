@@ -13,9 +13,11 @@ services:
       - key: SHOPIFY_CLIENT_SECRET
         sync: false
       - key: SHOPIFY_REDIRECT_URI
-        sync: false
+        value: https://seal-shine-backend.onrender.com/auth/callback
       - key: SHOPIFY_SHOP_DOMAIN
         value: suresealsealants-2.myshopify.com
+      - key: FRONTEND_URL
+        value: https://seal-shine-frontend.onrender.com
 
   # Frontend Static Site (Vite / React)
   - type: web
@@ -29,3 +31,7 @@ services:
         sync: false
       - key: VITE_SHOPIFY_STORE_DOMAIN
         value: suresealsealants-2.myshopify.com
+      - key: VITE_API_URL
+        value: https://seal-shine-backend.onrender.com
+      - key: VITE_BACKEND_URL
+        value: https://seal-shine-backend.onrender.com
