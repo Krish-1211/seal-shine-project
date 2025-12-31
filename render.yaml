@@ -17,9 +17,10 @@ services:
       - key: SHOPIFY_SHOP_DOMAIN
         value: suresealsealants-2.myshopify.com
 
-  # Frontend Static Site
-  - type: static
+  # Frontend Static Site (Vite / React)
+  - type: web
     name: seal-shine-frontend
+    env: static
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     autoDeploy: true
