@@ -27,12 +27,12 @@ const Index = () => {
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     return products.filter(product => {
-      const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      // Note: Shopify demo products might not have 'category' field in the same way. 
-      // For now, we'll filter by product type if available, or just ignore category filter for demo.
-      // In a real app, you'd map Shopify 'productType' or tags to your categories.
-      const matchesCategory = categoryFilter ? product.category === categoryFilter : true;
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch = product.title.toLowerCase().includes(searchLower) ||
+        (product.description && product.description.toLowerCase().includes(searchLower));
+
+      // Match Shopify 'productType' to the category filter
+      const matchesCategory = categoryFilter ? product.productType === categoryFilter : true;
       return matchesSearch && matchesCategory;
     });
   }, [products, searchQuery, categoryFilter]);
