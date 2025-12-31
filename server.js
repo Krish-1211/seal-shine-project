@@ -164,6 +164,11 @@ app.get("/api/admin/dashboard-stats", async (req, res) => {
     }
 });
 
+// Redirect root to frontend
+app.get('/', (req, res) => {
+    res.redirect(FRONTEND_URL);
+});
+
 // START
 app.listen(PORT, () => {
     console.log(`Backend running on ${HOST}`);
