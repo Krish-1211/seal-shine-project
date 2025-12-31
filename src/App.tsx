@@ -31,7 +31,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <ChatWidget />
-        <BrowserRouter basename="/seal-shine-project">
+        <BrowserRouter basename="/">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
