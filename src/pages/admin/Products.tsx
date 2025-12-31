@@ -10,21 +10,29 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { storefrontApiRequest, STOREFRONT_QUERY } from "@/lib/shopify";
 import { toast } from "sonner";
+import axios from "axios";
 
 const Products = () => {
-    const { data: products, isLoading } = useQuery({
+    const { data: products, isLoading, isError } = useQuery({
         queryKey: ["admin-products"],
         queryFn: async () => {
             try {
-                const response = await storefrontApiRequest(STOREFRONT_QUERY, { first: 20 });
-                return response?.data?.products?.edges || [];
+                // Fetch from our backend proxy which uses Shopify Admin API
+                const response = await axios.get("/api/admin/products");
+                return response.data.products || [];
             } catch (error) {
                 console.error("Failed to fetch products:", error);
-                return [];
+                // If unauthorized, user might need to connect Shopify
+                if (axios.isAxiosError(error) && error.response?.status === 401) {
+                    toast.error("Not connected to Shopify", {
+                        description: "Please go to the dashboard to connect."
+                    });
+                }
+                throw error;
             }
         },
+        retry: false
     });
 
     const handleAddProduct = () => {
@@ -65,6 +73,12 @@ const Products = () => {
                                     Loading products...
                                 </TableCell>
                             </TableRow>
+                        ) : isError ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center text-red-500">
+                                    Failed to load products. Ensure backend is connected to Shopify.
+                                </TableCell>
+                            </TableRow>
                         ) : products.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={4} className="text-center">
@@ -72,13 +86,15 @@ const Products = () => {
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            products.map(({ node }: any) => (
-                                <TableRow key={node.id}>
-                                    <TableCell className="font-medium">{node.title}</TableCell>
-                                    <TableCell>Active</TableCell>
+                            products.map((product: any) => (
+                                <TableRow key={product.id}>
+                                    <TableCell className="font-medium">{product.title}</TableCell>
+                                    <TableCell>{product.status}</TableCell>
                                     <TableCell>
-                                        {node.priceRange.minVariantPrice.currencyCode}{" "}
-                                        {node.priceRange.minVariantPrice.amount}
+                                        {/* Admin API returns variants array. We'll show the price of the first variant. */}
+                                        {product.variants && product.variants.length > 0
+                                            ? `$${product.variants[0].price}`
+                                            : "N/A"}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <Button variant="ghost" size="sm">

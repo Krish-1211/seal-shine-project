@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,32 +10,30 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-
-const mockOrders = [
-    {
-        id: "ORD-001",
-        customer: "John Doe",
-        status: "Delivered",
-        total: "$120.00",
-        date: "2024-03-10",
-    },
-    {
-        id: "ORD-002",
-        customer: "Jane Smith",
-        status: "Processing",
-        total: "$85.50",
-        date: "2024-03-11",
-    },
-    {
-        id: "ORD-003",
-        customer: "Bob Johnson",
-        status: "Cancelled",
-        total: "$45.00",
-        date: "2024-03-12",
-    },
-];
+import axios from "axios";
+import { toast } from "sonner";
+import { format } from "date-fns";
 
 const Orders = () => {
+    const { data: orders, isLoading, isError } = useQuery({
+        queryKey: ["admin-orders"],
+        queryFn: async () => {
+            try {
+                const response = await axios.get("/api/admin/orders");
+                return response.data.orders || [];
+            } catch (error) {
+                console.error("Failed to fetch orders:", error);
+                if (axios.isAxiosError(error) && error.response?.status === 401) {
+                    toast.error("Not connected to Shopify", {
+                        description: "Please go to the dashboard to connect."
+                    });
+                }
+                throw error;
+            }
+        },
+        retry: false
+    });
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -55,33 +54,57 @@ const Orders = () => {
                         <TableRow>
                             <TableHead>Order ID</TableHead>
                             <TableHead>Customer</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead>Payment Status</TableHead>
+                            <TableHead>Fulfillment</TableHead>
                             <TableHead>Date</TableHead>
                             <TableHead className="text-right">Total</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {mockOrders.map((order) => (
-                            <TableRow key={order.id}>
-                                <TableCell className="font-medium">{order.id}</TableCell>
-                                <TableCell>{order.customer}</TableCell>
-                                <TableCell>
-                                    <Badge
-                                        variant={
-                                            order.status === "Delivered"
-                                                ? "default"
-                                                : order.status === "Processing"
-                                                    ? "secondary"
-                                                    : "destructive"
-                                        }
-                                    >
-                                        {order.status}
-                                    </Badge>
+                        {isLoading ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="text-center">
+                                    Loading orders...
                                 </TableCell>
-                                <TableCell>{order.date}</TableCell>
-                                <TableCell className="text-right">{order.total}</TableCell>
                             </TableRow>
-                        ))}
+                        ) : isError ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="text-center text-red-500">
+                                    Failed to load orders. Ensure backend is connected to Shopify.
+                                </TableCell>
+                            </TableRow>
+                        ) : orders.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={6} className="text-center">
+                                    No orders found
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            orders.map((order: any) => (
+                                <TableRow key={order.id}>
+                                    <TableCell className="font-medium">#{order.order_number}</TableCell>
+                                    <TableCell>
+                                        {order.customer
+                                            ? `${order.customer.first_name} ${order.customer.last_name}`
+                                            : "Guest"}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant={order.financial_status === 'paid' ? 'default' : 'secondary'}>
+                                            {order.financial_status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="outline">
+                                            {order.fulfillment_status || 'unfulfilled'}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>{format(new Date(order.created_at), 'MMM dd, yyyy')}</TableCell>
+                                    <TableCell className="text-right">
+                                        {order.currency} {order.total_price}
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
                     </TableBody>
                 </Table>
             </div>
