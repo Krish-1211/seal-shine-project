@@ -19,7 +19,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { MOCK_PRODUCTS } from "@/lib/mockData";
-
+import { useUser } from "@/contexts/UserContext";
+import { getProductPrice } from "@/lib/pricing";
 
 
 const ProductDetail = () => {
@@ -27,8 +28,18 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const addItem = useCartStore(state => state.addItem);
+  const { user } = useUser();
 
   const { data: productData, isLoading } = useShopifyProduct(handle || "");
+
+  const currentVariant = productData?.variants.edges[selectedVariantIndex]?.node;
+
+  const mockProduct = MOCK_PRODUCTS.find(p =>
+    p.codes.includes(currentVariant?.sku || "") ||
+    p.title === productData?.title
+  );
+
+  const pricing = mockProduct ? getProductPrice(mockProduct, user?.isWholesale || false) : null;
 
   const handleAddToCart = () => {
     if (!productData) return;
@@ -40,11 +51,17 @@ const ProductDetail = () => {
       node: productData
     } as ShopifyProduct;
 
+    // Use wholesale price if applicable, otherwise fallback to variant price
+    const finalPrice = pricing?.isWholesalePrice ? pricing.price.toString() : variant.price.amount;
+
     const cartItem = {
       product,
       variantId: variant.id,
       variantTitle: variant.title,
-      price: variant.price,
+      price: {
+        amount: finalPrice,
+        currencyCode: variant.price.currencyCode
+      },
       quantity,
       selectedOptions: variant.selectedOptions || []
     };
@@ -80,13 +97,10 @@ const ProductDetail = () => {
     );
   }
 
-  const currentVariant = productData.variants.edges[selectedVariantIndex]?.node;
-  const mainImage = productData.images.edges[0]?.node;
+  // Reload current variant and main image since hooks might return after render
+  // const currentVariant variable is now defined above to support pricing
 
-  const mockProduct = MOCK_PRODUCTS.find(p =>
-    p.codes.includes(currentVariant?.sku || "") ||
-    p.title === productData.title // Fallback to title match if SKU missing
-  );
+  const mainImage = productData.images.edges[0]?.node;
   const technicalData = mockProduct?.technicalData;
 
   return (
@@ -161,9 +175,24 @@ const ProductDetail = () => {
             <div>
               <Badge className="mb-2">In Stock</Badge>
               <h1 className="text-4xl font-bold mb-4">{productData.title}</h1>
-              <p className="text-3xl font-bold text-primary">
-                ${parseFloat(currentVariant?.price.amount || '0').toFixed(2)} {currentVariant?.price.currencyCode}
-              </p>
+              <div className="flex flex-col">
+                {pricing ? (
+                  <>
+                    <p className="text-3xl font-bold text-primary">
+                      {pricing.displayPrice}
+                    </p>
+                    {pricing.isWholesalePrice && (
+                      <p className="text-sm text-muted-foreground line-through">
+                        ${pricing.originalPrice?.toFixed(2)}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-3xl font-bold text-primary">
+                    ${parseFloat(currentVariant?.price.amount || '0').toFixed(2)} {currentVariant?.price.currencyCode}
+                  </p>
+                )}
+              </div>
               <p className="text-sm text-muted-foreground mt-1">GST inclusive</p>
               {currentVariant?.sku && (
                 <p className="text-sm font-medium mt-2">Item Code: {currentVariant.sku}</p>

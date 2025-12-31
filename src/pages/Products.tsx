@@ -11,12 +11,15 @@ import { MOCK_PRODUCTS, SITE_CONTENT } from "@/lib/mockData";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { ShopifyProduct } from "@/lib/shopify";
+import { useUser } from "@/contexts/UserContext";
+import { getProductPrice } from "@/lib/pricing";
 
 const Products = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const categoryFilter = searchParams.get("category");
     const [searchQuery, setSearchQuery] = useState("");
     const addItem = useCartStore(state => state.addItem);
+    const { user } = useUser();
 
     const filteredProducts = useMemo(() => {
         return MOCK_PRODUCTS.filter(product => {
@@ -27,7 +30,7 @@ const Products = () => {
         });
     }, [searchQuery, categoryFilter]);
 
-    const handleAddToCart = (product: typeof MOCK_PRODUCTS[0]) => {
+    const handleAddToCart = (product: typeof MOCK_PRODUCTS[0], price: number) => {
         // Convert mock product to ShopifyProduct structure for the store
         const shopifyProduct: ShopifyProduct = {
             node: {
@@ -37,7 +40,7 @@ const Products = () => {
                 handle: product.title.toLowerCase().replace(/\s+/g, '-'),
                 priceRange: {
                     minVariantPrice: {
-                        amount: product.price.toString(),
+                        amount: price.toString(),
                         currencyCode: "AUD"
                     }
                 },
@@ -55,7 +58,7 @@ const Products = () => {
                             id: product.id,
                             title: "Default Title",
                             price: {
-                                amount: product.price.toString(),
+                                amount: price.toString(),
                                 currencyCode: "AUD"
                             },
                             availableForSale: true,
@@ -72,7 +75,7 @@ const Products = () => {
             variantId: product.id,
             variantTitle: "Default Title",
             price: {
-                amount: product.price.toString(),
+                amount: price.toString(),
                 currencyCode: "AUD"
             },
             quantity: 1,
@@ -147,48 +150,59 @@ const Products = () => {
                     {/* Product Grid */}
                     {filteredProducts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {filteredProducts.map((product) => (
-                                <Card key={product.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col">
-                                    <div className="aspect-square bg-muted relative overflow-hidden">
-                                        <img
-                                            src={product.image}
-                                            alt={product.title}
-                                            className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                        <Badge className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground hover:bg-background/90">
-                                            {product.category}
-                                        </Badge>
-                                    </div>
-                                    <CardContent className="p-4 flex flex-col flex-1">
-                                        <Link to={`/product/${product.id}`} className="block mb-2">
-                                            <h3 className="font-semibold text-lg group-hover:text-secondary transition-colors line-clamp-1">
-                                                {product.title}
-                                            </h3>
-                                        </Link>
-                                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
-                                            {product.description}
-                                        </p>
-                                        {product.sizes && (
-                                            <div className="flex flex-wrap gap-1 mb-4">
-                                                {product.sizes.map(size => (
-                                                    <Badge key={size} variant="secondary" className="text-xs">
-                                                        {size}
-                                                    </Badge>
-                                                ))}
-                                            </div>
-                                        )}
-                                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
-                                            <span className="text-lg font-bold text-primary">
-                                                ${product.price.toFixed(2)}
-                                            </span>
-                                            <Button size="sm" onClick={() => handleAddToCart(product)}>
-                                                <ShoppingCart className="w-4 h-4 mr-2" />
-                                                Add
-                                            </Button>
+                            {filteredProducts.map((product) => {
+                                const pricing = getProductPrice(product, user?.isWholesale || false);
+
+                                return (
+                                    <Card key={product.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col">
+                                        <div className="aspect-square bg-muted relative overflow-hidden">
+                                            <img
+                                                src={product.image}
+                                                alt={product.title}
+                                                className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                            <Badge className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground hover:bg-background/90">
+                                                {product.category}
+                                            </Badge>
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                                        <CardContent className="p-4 flex flex-col flex-1">
+                                            <Link to={`/product/${product.id}`} className="block mb-2">
+                                                <h3 className="font-semibold text-lg group-hover:text-secondary transition-colors line-clamp-1">
+                                                    {product.title}
+                                                </h3>
+                                            </Link>
+                                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
+                                                {product.description}
+                                            </p>
+                                            {product.sizes && (
+                                                <div className="flex flex-wrap gap-1 mb-4">
+                                                    {product.sizes.map(size => (
+                                                        <Badge key={size} variant="secondary" className="text-xs">
+                                                            {size}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
+                                                <div className="flex flex-col">
+                                                    <span className="text-lg font-bold text-primary">
+                                                        {pricing.displayPrice}
+                                                    </span>
+                                                    {pricing.isWholesalePrice && (
+                                                        <span className="text-xs text-muted-foreground line-through">
+                                                            ${pricing.originalPrice?.toFixed(2)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <Button size="sm" onClick={() => handleAddToCart(product, pricing.price)}>
+                                                    <ShoppingCart className="w-4 h-4 mr-2" />
+                                                    Add
+                                                </Button>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
                         </div>
                     ) : (
                         <div className="text-center py-24 bg-muted/30 rounded-lg">

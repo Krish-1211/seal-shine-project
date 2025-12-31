@@ -1,0 +1,31 @@
+
+services:
+  # Backend Service (Node.js)
+  - type: web
+    name: seal-shine-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: SHOPIFY_CLIENT_ID
+        sync: false
+      - key: SHOPIFY_CLIENT_SECRET
+        sync: false
+      - key: SHOPIFY_REDIRECT_URI
+        sync: false
+      - key: SHOPIFY_SHOP_DOMAIN
+        value: suresealsealants-2.myshopify.com
+
+  # Frontend Static Site
+  - type: web
+    name: seal-shine-frontend
+    env: static
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_SHOPIFY_STOREFRONT_TOKEN
+        sync: false
+      - key: VITE_SHOPIFY_STORE_DOMAIN
+        value: suresealsealants-2.myshopify.com

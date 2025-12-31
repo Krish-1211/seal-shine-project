@@ -58,13 +58,29 @@ export const SITE_CONTENT = {
   ]
 };
 
-export const MOCK_PRODUCTS = [
+export interface Product {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  wholesalePrice?: number;
+  image: string;
+  category: string;
+  sizes: string[];
+  codes: string[];
+  packageType: string;
+  technicalData?: string;
+  images?: string[];
+}
+
+export const MOCK_PRODUCTS: Product[] = [
   // CLEANERS
   {
     id: "GTS750U",
     title: "Grout, Tile & Stone Cleaner (Spray & Wipe)",
     description: "Ready to use, fast acting stain remover. Safe for all surfaces (avoid unsealed polished stone). Great for everyday use.",
     price: 29.95,
+    wholesalePrice: 19.95,
     image: "/seal-shine-project/images/cleaner_gts750u_front.png",
     category: "Cleaners",
     sizes: ["750ML"],
@@ -81,6 +97,7 @@ export const MOCK_PRODUCTS = [
     title: "Grout, Tile & Stone Cleaner Concentrate",
     description: "Concentrated heavy duty cleaner. Cleans toughest stains. Great for dirt removal and cleaning concrete. Recommended for use on sealed surfaces.",
     price: 45.00,
+    wholesalePrice: 32.50,
     image: "/seal-shine-project/images/cleaner_gts1u_group.png",
     category: "Cleaners",
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
@@ -97,6 +114,7 @@ export const MOCK_PRODUCTS = [
     title: "Eff-Plus Remover",
     description: "Removes efflorescence, grout haze, cement, and rust stains.",
     price: 35.00,
+    wholesalePrice: 28.00,
     image: "/seal-shine-project/images/cleaner_effp1u_group.jpg",
     category: "Cleaners",
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
@@ -105,23 +123,24 @@ export const MOCK_PRODUCTS = [
     technicalData: "/seal-shine-project/technical_data/epfplusremover.pdf",
     images: [
       "/seal-shine-project/images/cleaner_effp1u_group.jpg",
-      "/seal-shine-project/images/cleaner_effp1u.png"
+      "/seal-shine-project/images/eff_plus_remover.png"
     ]
   },
   {
     id: "SC1U",
     title: "Sure Clean Porcelain Paste Cleaner",
-    description: "Heavy duty cleaning power. Removes wax, oil, grout haze and pencil marks. Safe to use, non toxic and not acidic.",
-    price: 32.50,
+    description: "Removes wax, grease, oil, and soap scum. Ideal for polished porcelain and natural stone.",
+    price: 40.00,
+    wholesalePrice: 32.00,
     image: "/seal-shine-project/images/cleaner_sc1u_group.png",
     category: "Cleaners",
-    sizes: ["1 LTR", "4 LTR", "20 LTR"],
-    codes: ["SC1U", "SC4U", "SC20D"],
-    packageType: "Unit / Drum",
+    sizes: ["1 LTR", "4 LTR"],
+    codes: ["SC1U", "SC4U"],
+    packageType: "Tub",
     technicalData: "/seal-shine-project/technical_data/surecleanporcelaincleaner.pdf",
     images: [
       "/seal-shine-project/images/cleaner_sc1u_group.png",
-      "/seal-shine-project/images/cleaner_sc1u.png"
+      "/seal-shine-project/images/sure_clean_porcelain_cleaner.png"
     ]
   },
   {
@@ -129,6 +148,7 @@ export const MOCK_PRODUCTS = [
     title: "Rug, Carpet & Textile Stain Remover",
     description: "Fast acting stain remover. Safe & easy to use. For rugs, carpet, car mats & more.",
     price: 24.95,
+    wholesalePrice: 18.95,
     image: "/seal-shine-project/images/cleaner_rcsr750u_front.png",
     category: "Cleaners",
     sizes: ["750ML"],
@@ -146,6 +166,7 @@ export const MOCK_PRODUCTS = [
     title: "Grout, Tile & Stone Sealer (Quick Drying)",
     description: "World's First Aerosol Sealer. Used and recommended by many tilers & contractors. Long lasting stain protection. Resists water and oil based stains. Helps prevent mould & mildew.",
     price: 39.95,
+    wholesalePrice: 29.95,
     image: "/seal-shine-project/images/sealer_gts300a_front.png",
     category: "Aerosols",
     sizes: ["300g"],
@@ -162,6 +183,7 @@ export const MOCK_PRODUCTS = [
     title: "Grout, Tile & Stone Sealer (Slow Drying)",
     description: "Ideal for stone bench tops. Deep penetrating sealer. Long lasting stain protection. Resists water and oil based stains. Helps prevent mould & mildew.",
     price: 39.95,
+    wholesalePrice: 29.95,
     image: "/seal-shine-project/images/sealer_sdau_front.png",
     category: "Aerosols",
     sizes: ["300g"],
@@ -178,6 +200,7 @@ export const MOCK_PRODUCTS = [
     title: "Rug & Carpet Protector",
     description: "Protects from oil and water-based stains. Will not affect dyes or cause shrinkage. Suitable for Oriental & Persian rugs & carpet, lounge suites & car upholstery.",
     price: 34.95,
+    wholesalePrice: 26.95,
     image: "/seal-shine-project/images/sealer_rcpau_front.png",
     category: "Aerosols",
     sizes: ["350g"],
@@ -194,6 +217,7 @@ export const MOCK_PRODUCTS = [
     title: "Timber Sealer",
     description: "Preserves & Extends. Quick drying & easy to apply. Suitable for raw & stained timber. Oil & stain resistant.",
     price: 34.95,
+    wholesalePrice: 26.95,
     image: "/seal-shine-project/images/sealer_tsau_front.png",
     category: "Aerosols",
     sizes: ["300g"],
@@ -212,6 +236,7 @@ export const MOCK_PRODUCTS = [
     title: "Ezy As 1-2-3 Water-Based Sealer",
     description: "Create your own finish: Low sheen, semi-gloss or full gloss. Gloss up walls eg. natural stack stone walls. Will maintain a tough, durable finish that resists abrasion.",
     price: 55.00,
+    wholesalePrice: 42.00,
     image: "/seal-shine-project/images/sealer_ezyas1l_group.jpg",
     category: "Sealers",
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
@@ -227,6 +252,7 @@ export const MOCK_PRODUCTS = [
     title: "Consolidator Sealer Water-Based",
     description: "Ideal around salt-water swimming pools. Hardens loose & friable surfaces. Helps prevent saltwater erosion. Binds stone.",
     price: 59.00,
+    wholesalePrice: 45.00,
     image: "/seal-shine-project/images/sealer_sd1u_wb_group.jpg",
     category: "Sealers",
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
@@ -243,6 +269,7 @@ export const MOCK_PRODUCTS = [
     title: "Timber Sealer (Solvent)",
     description: "Preserves & Protects. Suitable for raw & stained timber. Protects against water & oil staining. Invisible protection.",
     price: 49.00,
+    wholesalePrice: 38.00,
     image: "/seal-shine-project/images/sealer_24p1u_s_front.jpg",
     category: "Sealers",
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
@@ -259,6 +286,7 @@ export const MOCK_PRODUCTS = [
     title: "Grout, Tile & Stone Sealer (Quick Drying Solvent)",
     description: "Superior protection for porous surfaces. Works great for terracotta. Protects from mould and thaw damage. Ideal for low temperature application.",
     price: 65.00,
+    wholesalePrice: 50.00,
     image: "/seal-shine-project/images/sealer_qd1u_s_group.jpg",
     category: "Sealers",
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
@@ -275,6 +303,7 @@ export const MOCK_PRODUCTS = [
     title: "Grout, Tile & Stone Sealer (Slow Drying Solvent)",
     description: "Durable stain resistant protection for dense surfaces. Best for Marble & Granite application. Slower drying for greater penetration. Helps prevent mould and mildew.",
     price: 65.00,
+    wholesalePrice: 50.00,
     image: "/seal-shine-project/images/sealer_sd1u_s_group.jpg",
     category: "Sealers",
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
@@ -291,6 +320,7 @@ export const MOCK_PRODUCTS = [
     title: "24/7 Plus Stone & Concrete Sealer",
     description: "Water-based. Excellent for garden walls, retaining walls, decorative concrete and benches. Life for up to 10 years. Allows the treated surface to breathe.",
     price: 55.00,
+    wholesalePrice: 42.00,
     image: "/seal-shine-project/images/sealer_24p1u_wb_group.jpg",
     category: "Sealers",
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
@@ -306,6 +336,7 @@ export const MOCK_PRODUCTS = [
     title: "Premium Plus Sealer",
     description: "Gold Standard Sealer. Water-based, heavy duty penetrating sealer for commercial application. Promotes easier clean up. Long life sealer for up to 15 years. Ideal for high-traffic areas.",
     price: 75.00,
+    wholesalePrice: 58.00,
     image: "/seal-shine-project/images/sealer_pp1u_group.jpg",
     category: "Sealers",
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
