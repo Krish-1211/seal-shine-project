@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { ShopifyProduct } from "@/lib/shopify";
 import { useUser } from "@/contexts/UserContext";
 import { getProductPrice } from "@/lib/pricing";
+import { useShopifyProducts } from "@/hooks/useShopify";
 
 const Products = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -21,65 +22,38 @@ const Products = () => {
     const addItem = useCartStore(state => state.addItem);
     const { user } = useUser();
 
+    // Fetch real products from Shopify
+    const { data: products, isLoading } = useShopifyProducts();
+
     const filteredProducts = useMemo(() => {
-        return MOCK_PRODUCTS.filter(product => {
+        if (!products) return [];
+        return products.filter(product => {
             const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 product.description.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesCategory = categoryFilter ? product.category === categoryFilter : true;
+            // Map Shopify "productType" to our "category" filter
+            // Ideally, ensure Shopify product types match "Cleaners", "Sealers", "Aerosols"
+            const matchesCategory = categoryFilter ? product.productType === categoryFilter : true;
             return matchesSearch && matchesCategory;
         });
-    }, [searchQuery, categoryFilter]);
+    }, [products, searchQuery, categoryFilter]);
 
-    const handleAddToCart = (product: typeof MOCK_PRODUCTS[0], price: number) => {
-        // Convert mock product to ShopifyProduct structure for the store
-        const shopifyProduct: ShopifyProduct = {
-            node: {
-                id: product.id,
-                title: product.title,
-                description: product.description,
-                handle: product.title.toLowerCase().replace(/\s+/g, '-'),
-                priceRange: {
-                    minVariantPrice: {
-                        amount: price.toString(),
-                        currencyCode: "AUD"
-                    }
-                },
-                images: {
-                    edges: [{
-                        node: {
-                            url: product.image,
-                            altText: product.title
-                        }
-                    }]
-                },
-                variants: {
-                    edges: [{
-                        node: {
-                            id: product.id,
-                            title: "Default Title",
-                            price: {
-                                amount: price.toString(),
-                                currencyCode: "AUD"
-                            },
-                            availableForSale: true,
-                            selectedOptions: []
-                        }
-                    }]
-                },
-                options: []
-            }
-        };
+    const handleAddToCart = (product: ShopifyProduct['node'], price: string) => {
+        const defaultVariant = product.variants.edges[0]?.node;
+        if (!defaultVariant) {
+            toast.error("No variant available");
+            return;
+        }
 
         const cartItem = {
-            product: shopifyProduct,
-            variantId: product.id,
-            variantTitle: "Default Title",
+            product: { node: product },
+            variantId: defaultVariant.id, // REAL Globally Unique ID
+            variantTitle: defaultVariant.title,
             price: {
-                amount: price.toString(),
-                currencyCode: "AUD"
+                amount: price,
+                currencyCode: defaultVariant.price.currencyCode
             },
             quantity: 1,
-            selectedOptions: []
+            selectedOptions: defaultVariant.selectedOptions || []
         };
 
         addItem(cartItem);
@@ -88,6 +62,18 @@ const Products = () => {
             position: "top-center",
         });
     };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-background flex flex-col">
+                <Navbar />
+                <main className="flex-1 py-12 flex items-center justify-center">
+                    <p className="text-muted-foreground">Loading products from Shopify...</p>
+                </main>
+                <Footer />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -151,22 +137,46 @@ const Products = () => {
                     {filteredProducts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {filteredProducts.map((product) => {
-                                const pricing = getProductPrice(product, user?.isWholesale || false);
+                                // Attempt to match with mock data for wholesale pricing
+                                const mockProduct = MOCK_PRODUCTS.find(mp => mp.title === product.title || mp.id === product.handle);
+
+                                let pricing;
+                                if (mockProduct) {
+                                    pricing = getProductPrice(mockProduct, user?.isWholesale || false);
+                                } else {
+                                    // Fallback if no mock data found (use real Shopify price)
+                                    const price = parseFloat(product.priceRange.minVariantPrice.amount);
+                                    pricing = {
+                                        price: price,
+                                        isWholesalePrice: false,
+                                        displayPrice: `$${price.toFixed(2)}`
+                                    };
+                                }
+
+                                const mainImage = product.images.edges[0]?.node.url;
 
                                 return (
                                     <Card key={product.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col">
                                         <div className="aspect-square bg-muted relative overflow-hidden">
-                                            <img
-                                                src={product.image}
-                                                alt={product.title}
-                                                className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
-                                            />
-                                            <Badge className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground hover:bg-background/90">
-                                                {product.category}
-                                            </Badge>
+                                            {mainImage ? (
+                                                <img
+                                                    src={mainImage}
+                                                    alt={product.title}
+                                                    className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                                                    No Image
+                                                </div>
+                                            )}
+                                            {product.productType && (
+                                                <Badge className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground hover:bg-background/90">
+                                                    {product.productType}
+                                                </Badge>
+                                            )}
                                         </div>
                                         <CardContent className="p-4 flex flex-col flex-1">
-                                            <Link to={`/product/${product.id}`} className="block mb-2">
+                                            <Link to={`/product/${product.handle}`} className="block mb-2">
                                                 <h3 className="font-semibold text-lg group-hover:text-secondary transition-colors line-clamp-1">
                                                     {product.title}
                                                 </h3>
@@ -174,15 +184,16 @@ const Products = () => {
                                             <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
                                                 {product.description}
                                             </p>
-                                            {product.sizes && (
+
+                                            {/* Display options if any (e.g. sizes) - Simplified for grid */}
+                                            {product.variants.edges.length > 1 && (
                                                 <div className="flex flex-wrap gap-1 mb-4">
-                                                    {product.sizes.map(size => (
-                                                        <Badge key={size} variant="secondary" className="text-xs">
-                                                            {size}
-                                                        </Badge>
-                                                    ))}
+                                                    <Badge variant="secondary" className="text-xs">
+                                                        {product.variants.edges.length} sizes
+                                                    </Badge>
                                                 </div>
                                             )}
+
                                             <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
                                                 <div className="flex flex-col">
                                                     <span className="text-lg font-bold text-primary">
@@ -194,7 +205,7 @@ const Products = () => {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <Button size="sm" onClick={() => handleAddToCart(product, pricing.price)}>
+                                                <Button size="sm" onClick={() => handleAddToCart(product, pricing.price.toString())}>
                                                     <ShoppingCart className="w-4 h-4 mr-2" />
                                                     Add
                                                 </Button>
