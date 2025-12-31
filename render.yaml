@@ -18,12 +18,10 @@ services:
         value: suresealsealants-2.myshopify.com
 
   # Frontend Static Site
-  - type: web
+  - type: static
     name: seal-shine-frontend
-    env: static
-    plan: free
     buildCommand: npm install && npm run build
-    staticPublishPath: ./dist   # change to ./build if not using Vite
+    staticPublishPath: dist
     autoDeploy: true
     envVars:
       - key: VITE_SHOPIFY_STOREFRONT_TOKEN
