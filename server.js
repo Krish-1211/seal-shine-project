@@ -108,13 +108,13 @@ app.get("/api/admin/dashboard-stats", async (req, res) => {
 
         const [productCountRes, ordersRes] = await Promise.all([
             axios.get(`${baseURL}/products/count.json`, { headers }),
-            axios.get(`${baseURL}/orders.json?status=any&limit=50`, { headers })
+            axios.get(`${baseURL}/orders.json?status=any&limit=250`, { headers }) // Increased limit to get more meaningful chart data
         ]);
 
         const productCount = productCountRes.data.count;
         const recentOrders = ordersRes.data.orders;
 
-        // Calculate revenue from recent orders (simplified)
+        // Calculate revenue from fetched orders
         const totalRevenue = recentOrders.reduce((sum, order) => sum + parseFloat(order.total_price), 0);
 
         // Map recent sales for the UI
@@ -124,10 +124,35 @@ app.get("/api/admin/dashboard-stats", async (req, res) => {
             amount: `$${order.total_price}`
         }));
 
+        // Calculate Sales Over Time (Group by Month)
+        const salesByMonth = {};
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        recentOrders.forEach(order => {
+            const date = new Date(order.created_at);
+            const monthIndex = date.getMonth();
+            const monthName = monthNames[monthIndex];
+
+            if (!salesByMonth[monthName]) {
+                salesByMonth[monthName] = 0;
+            }
+            salesByMonth[monthName] += parseFloat(order.total_price);
+        });
+
+        // Convert key-value to array for Recharts
+        // We want to ensure specific order if possible, but for now filtering specifically present months
+        const salesOverTime = monthNames.map(month => ({
+            name: month,
+            total: salesByMonth[month] || 0
+        })).filter(item => item.total > 0 || true); // Keep all months or filter? Let's return all for the chart axis stability, or just 12 months.
+        // Actually, let's just return the 12 months structure to fill the chart
+        // A better approach for a "Recent" chart might be last 6 months, but simple Jan-Dec works for now.
+
         res.json({
             productCount,
             totalRevenue,
             recentSales,
+            salesOverTime, // New field
             store: shop
         });
     } catch (error) {

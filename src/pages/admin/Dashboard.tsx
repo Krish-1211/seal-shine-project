@@ -5,15 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 
-const dummyChartData = [
-    { name: "Jan", total: 1200 },
-    { name: "Feb", total: 2100 },
-    { name: "Mar", total: 1800 },
-    { name: "Apr", total: 2400 },
-    { name: "May", total: 3200 },
-    { name: "Jun", total: 4500 },
-];
-
 const Dashboard = () => {
     const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -58,7 +49,7 @@ const Dashboard = () => {
         );
     }
 
-    const { totalRevenue, productCount, recentSales, store } = stats || {};
+    const { totalRevenue, productCount, recentSales, salesOverTime, store } = stats || {};
 
     return (
         <div className="space-y-6">
@@ -73,7 +64,7 @@ const Dashboard = () => {
                         <div className="text-2xl font-bold">
                             ${totalRevenue?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
                         </div>
-                        <p className="text-xs text-muted-foreground">Based on last 50 orders</p>
+                        <p className="text-xs text-muted-foreground">Based on last 250 orders</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -116,7 +107,7 @@ const Dashboard = () => {
                     </CardHeader>
                     <CardContent className="pl-2">
                         <ResponsiveContainer width="100%" height={350}>
-                            <BarChart data={dummyChartData}>
+                            <BarChart data={salesOverTime || []}>
                                 <XAxis
                                     dataKey="name"
                                     stroke="#888888"
