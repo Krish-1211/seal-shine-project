@@ -75,6 +75,49 @@ app.get("/api/admin/orders", async (req, res) => {
     }
 });
 
+app.get("/api/admin/dashboard-stats", async (req, res) => {
+    try {
+        const accessToken = getShopifyAccessToken();
+        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "suresealsealants-2.myshopify.com";
+        const headers = {
+            "X-Shopify-Access-Token": accessToken,
+            "Content-Type": "application/json"
+        };
+        const baseURL = `https://${shop}/admin/api/2024-01`;
+
+        const [productCountRes, ordersRes] = await Promise.all([
+            axios.get(`${baseURL}/products/count.json`, { headers }),
+            axios.get(`${baseURL}/orders.json?status=any&limit=50`, { headers })
+        ]);
+
+        const productCount = productCountRes.data.count;
+        const recentOrders = ordersRes.data.orders;
+
+        // Calculate revenue from recent orders (simplified)
+        const totalRevenue = recentOrders.reduce((sum, order) => sum + parseFloat(order.total_price), 0);
+
+        // Map recent sales for the UI
+        const recentSales = recentOrders.slice(0, 5).map(order => ({
+            name: order.customer ? `${order.customer.first_name} ${order.customer.last_name}` : "Guest",
+            email: order.customer ? order.customer.email : "N/A",
+            amount: `$${order.total_price}`
+        }));
+
+        res.json({
+            productCount,
+            totalRevenue,
+            recentSales,
+            store: shop
+        });
+    } catch (error) {
+        console.error("Error fetching dashboard stats:", error.response?.data || error.message);
+        if (error.message.includes("not initialized")) {
+            return res.status(401).json({ error: "Unauthorized. Please connect Shopify." });
+        }
+        res.status(500).json({ error: "Failed to fetch dashboard stats" });
+    }
+});
+
 // START
 app.listen(PORT, () => {
     console.log(`Backend running on ${HOST}`);
