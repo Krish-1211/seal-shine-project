@@ -54,7 +54,7 @@ const Index = () => {
       variantId: product.variants?.edges?.[0]?.node?.id || product.id, // Fallback if no variants
       variantTitle: product.variants?.edges?.[0]?.node?.title || "Default",
       price: {
-        amount: product.priceRange?.minVariantPrice?.amount || (typeof product.price === 'number' ? product.price.toFixed(2) : "0.00"),
+        amount: product.priceRange?.minVariantPrice?.amount || (typeof (product as any).price === 'number' ? (product as any).price.toFixed(2) : "0.00"),
         currencyCode: product.priceRange?.minVariantPrice?.currencyCode || "AUD"
       },
       quantity: 1,
