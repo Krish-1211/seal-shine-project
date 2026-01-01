@@ -28,11 +28,15 @@ const Products = () => {
     const filteredProducts = useMemo(() => {
         if (!products) return [];
         return products.filter(product => {
-            const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                product.description.toLowerCase().includes(searchQuery.toLowerCase());
+            const node = product.node || product; // Handle different structures if any
+            const title = (node.title || "").toLowerCase();
+            const description = (node.description || "").toLowerCase();
+            const query = searchQuery.toLowerCase();
+
+            const matchesSearch = title.includes(query) || description.includes(query);
             // Map Shopify "productType" to our "category" filter
             // Ideally, ensure Shopify product types match "Cleaners", "Sealers", "Aerosols"
-            const matchesCategory = categoryFilter ? product.productType === categoryFilter : true;
+            const matchesCategory = categoryFilter ? node.productType === categoryFilter : true;
             return matchesSearch && matchesCategory;
         });
     }, [products, searchQuery, categoryFilter]);
