@@ -1,35 +1,58 @@
 import { useQuery } from "@tanstack/react-query";
-import { storefrontApiRequest, STOREFRONT_QUERY, ShopifyProduct } from "@/lib/shopify";
+import { ShopifyProduct } from "@/lib/shopify";
+import { MOCK_PRODUCTS } from "@/lib/mockData";
 
 export const useShopifyProducts = () => {
   return useQuery({
     queryKey: ["shopify-products"],
     queryFn: async () => {
-      const shopDomain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN || "suresealsealants-2.myshopify.com";
+      // Return mock products mapped to Shopify structure
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate latency
 
-      const response = await fetch(`https://${shopDomain}/api/2024-01/graphql.json`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
+      return MOCK_PRODUCTS.map(p => ({
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        handle: p.id,
+        productType: p.category,
+        tags: [],
+        priceRange: {
+          minVariantPrice: {
+            amount: p.price.toFixed(2),
+            currencyCode: "AUD"
+          }
         },
-        body: JSON.stringify({
-          query: STOREFRONT_QUERY,
-          variables: { first: 20 }
-        })
-      });
-
-      if (!response.ok) {
-        console.error("Shopify API Error:", response.status, response.statusText);
-        throw new Error(`Shopify API failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.errors) {
-        console.error("GraphQL Errors:", data.errors);
-        throw new Error(data.errors[0].message);
-      }
-
-      return data.data.products.edges.map((edge: any) => edge.node) as ShopifyProduct["node"][];
+        images: {
+          edges: (p.images && p.images.length > 0 ? p.images : [p.image]).map(url => ({
+            node: {
+              url,
+              altText: p.title
+            }
+          }))
+        },
+        variants: {
+          edges: p.sizes.map((size, idx) => ({
+            node: {
+              id: `${p.id}-${idx}`,
+              title: size,
+              sku: p.codes && p.codes[idx] ? p.codes[idx] : "",
+              price: {
+                amount: p.price.toFixed(2),
+                currencyCode: "AUD"
+              },
+              availableForSale: true,
+              selectedOptions: [{
+                name: "Size",
+                value: size
+              }]
+            }
+          }))
+        },
+        options: [{
+          name: "Size",
+          values: p.sizes
+        }]
+      })) as ShopifyProduct["node"][];
     },
   });
 };
@@ -38,76 +61,58 @@ export const useShopifyProduct = (handle: string) => {
   return useQuery({
     queryKey: ["shopify-product", handle],
     queryFn: async () => {
-      const shopDomain = import.meta.env.VITE_SHOPIFY_STORE_DOMAIN || "suresealsealants-2.myshopify.com";
-      const query = `
-        query GetProduct($handle: String!) {
-          productByHandle(handle: $handle) {
-            id
-            title
-            description
-            handle
-            productType
-            tags
-            priceRange {
-              minVariantPrice {
-                amount
-                currencyCode
-              }
-            }
-            images(first: 5) {
-              edges {
-                node {
-                  url
-                  altText
-                }
-              }
-            }
-            variants(first: 10) {
-              edges {
-                node {
-                  id
-                  title
-                  price {
-                    amount
-                    currencyCode
-                  }
-                  availableForSale
-                  selectedOptions {
-                    name
-                    value
-                  }
-                }
-              }
-            }
-            options {
-              name
-              values
-            }
+      await new Promise(resolve => setTimeout(resolve, 300)); // Simulate latency
+
+      const p = MOCK_PRODUCTS.find(product => product.id === handle);
+
+      if (!p) {
+        throw new Error("Product not found");
+      }
+
+      return {
+        id: p.id,
+        title: p.title,
+        description: p.description,
+        handle: p.id,
+        productType: p.category,
+        tags: [],
+        priceRange: {
+          minVariantPrice: {
+            amount: p.price.toFixed(2),
+            currencyCode: "AUD"
           }
-        }
-      `;
-
-      const response = await fetch(`https://${shopDomain}/api/2024-01/graphql.json`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          query,
-          variables: { handle }
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Shopify API failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.errors) {
-        throw new Error(data.errors[0].message);
-      }
-
-      return data.data.productByHandle as ShopifyProduct["node"];
+        images: {
+          edges: (p.images && p.images.length > 0 ? p.images : [p.image]).map(url => ({
+            node: {
+              url,
+              altText: p.title
+            }
+          }))
+        },
+        variants: {
+          edges: p.sizes.map((size, idx) => ({
+            node: {
+              id: `${p.id}-${idx}`,
+              title: size,
+              sku: p.codes && p.codes[idx] ? p.codes[idx] : "",
+              price: {
+                amount: p.price.toFixed(2),
+                currencyCode: "AUD"
+              },
+              availableForSale: true,
+              selectedOptions: [{
+                name: "Size",
+                value: size
+              }]
+            }
+          }))
+        },
+        options: [{
+          name: "Size",
+          values: p.sizes
+        }]
+      } as ShopifyProduct["node"];
     },
     enabled: !!handle,
   });
