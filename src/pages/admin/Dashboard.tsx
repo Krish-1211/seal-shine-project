@@ -40,7 +40,7 @@ const Dashboard = () => {
                     variant="default"
                     onClick={() => {
                         const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || '';
-                        window.location.href = `${backendUrl}/auth/shopify?shop=suresealsealants-2.myshopify.com`;
+                        window.location.href = `${backendUrl}/auth/shopify?shop=suresealsealants.myshopify.com`;
                     }}
                 >
                     Connect Shopify

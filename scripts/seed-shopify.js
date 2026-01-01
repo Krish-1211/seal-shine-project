@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // CONFIGURATION
-const SHOPIFY_STORE_DOMAIN = 'suresealsealants-2.myshopify.com'; // From your project config
+const SHOPIFY_STORE_DOMAIN = 'suresealsealants.myshopify.com'; // From your project config
 const API_VERSION = '2024-01';
 
 // MOCK DATA (Copied from src/lib/mockData.ts)

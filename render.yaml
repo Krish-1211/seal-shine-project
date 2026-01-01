@@ -15,7 +15,7 @@ services:
       - key: SHOPIFY_REDIRECT_URI
         value: https://seal-shine-backend.onrender.com/auth/callback
       - key: SHOPIFY_SHOP_DOMAIN
-        value: suresealsealants-2.myshopify.com
+        value: suresealsealants.myshopify.com
       - key: FRONTEND_URL
         value: https://seal-shine-frontend.onrender.com
 
@@ -30,7 +30,7 @@ services:
       - key: VITE_SHOPIFY_STOREFRONT_TOKEN
         sync: false
       - key: VITE_SHOPIFY_STORE_DOMAIN
-        value: suresealsealants-2.myshopify.com
+        value: suresealsealants.myshopify.com
       - key: VITE_API_URL
         value: https://seal-shine-backend.onrender.com
       - key: VITE_BACKEND_URL
