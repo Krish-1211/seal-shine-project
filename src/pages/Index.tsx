@@ -27,12 +27,15 @@ const Index = () => {
   const filteredProducts = useMemo(() => {
     if (!products) return [];
     return products.filter(product => {
+      const node = product.node || product;
+      const title = (node.title || "").toLowerCase();
+      const description = (node.description || "").toLowerCase();
       const searchLower = searchQuery.toLowerCase();
-      const matchesSearch = product.title.toLowerCase().includes(searchLower) ||
-        (product.description && product.description.toLowerCase().includes(searchLower));
+
+      const matchesSearch = title.includes(searchLower) || description.includes(searchLower);
 
       // Match Shopify 'productType' to the category filter
-      const matchesCategory = categoryFilter ? product.productType === categoryFilter : true;
+      const matchesCategory = categoryFilter ? node.productType === categoryFilter : true;
       return matchesSearch && matchesCategory;
     });
   }, [products, searchQuery, categoryFilter]);
@@ -48,11 +51,11 @@ const Index = () => {
 
     const cartItem = {
       product: cartItemProduct,
-      variantId: product.variants.edges[0]?.node.id, // Default to first variant
-      variantTitle: product.variants.edges[0]?.node.title,
+      variantId: product.variants?.edges?.[0]?.node?.id || product.id, // Fallback if no variants
+      variantTitle: product.variants?.edges?.[0]?.node?.title || "Default",
       price: {
-        amount: product.priceRange.minVariantPrice.amount,
-        currencyCode: product.priceRange.minVariantPrice.currencyCode
+        amount: product.priceRange?.minVariantPrice?.amount || (typeof product.price === 'number' ? product.price.toFixed(2) : "0.00"),
+        currencyCode: product.priceRange?.minVariantPrice?.currencyCode || "AUD"
       },
       quantity: 1,
       selectedOptions: []
@@ -129,39 +132,61 @@ const Index = () => {
             </div>
           ) : filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
-                <Card key={product.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col">
-                  <div className="aspect-square bg-muted relative overflow-hidden">
-                    <img
-                      src={product.images.edges[0]?.node.url || "/placeholder.svg"}
-                      alt={product.images.edges[0]?.node.altText || product.title}
-                      className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
-                    />
-                    {/* <Badge className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground hover:bg-background/90">
-                      {product.productType}
-                    </Badge> */}
-                  </div>
-                  <CardContent className="p-4 flex flex-col flex-1">
-                    <Link to={`/product/${product.handle}`} className="block mb-2">
-                      <h3 className="font-semibold text-lg group-hover:text-secondary transition-colors line-clamp-1">
-                        {product.title}
-                      </h3>
-                    </Link>
-                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
-                      {product.description}
-                    </p>
-                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
-                      <span className="text-lg font-bold text-primary">
-                        ${parseFloat(product.priceRange.minVariantPrice.amount).toFixed(2)}
-                      </span>
-                      <Button size="sm" onClick={() => handleAddToCart(product)}>
-                        <ShoppingCart className="w-4 h-4 mr-2" />
-                        Add
-                      </Button>
+              {filteredProducts.map((product) => {
+                const node = product.node || product;
+                const title = node.title || "";
+                const handle = node.handle || node.id;
+                const description = node.description || "";
+
+                // Image handling
+                let mainImage = "/placeholder.svg";
+                if (node.images?.edges?.[0]?.node?.url) {
+                  mainImage = node.images.edges[0].node.url;
+                } else if (Array.isArray(node.images) && node.images.length > 0) {
+                  mainImage = node.images[0];
+                } else if (node.image) {
+                  mainImage = node.image;
+                }
+
+                // Price handling
+                let priceStr = "0.00";
+                if (node.priceRange?.minVariantPrice?.amount) {
+                  priceStr = node.priceRange.minVariantPrice.amount;
+                } else if (typeof node.price === 'number') {
+                  priceStr = node.price.toFixed(2);
+                }
+
+                return (
+                  <Card key={node.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col">
+                    <div className="aspect-square bg-muted relative overflow-hidden">
+                      <img
+                        src={mainImage}
+                        alt={title}
+                        className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
+                      />
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <CardContent className="p-4 flex flex-col flex-1">
+                      <Link to={`/product/${handle}`} className="block mb-2">
+                        <h3 className="font-semibold text-lg group-hover:text-secondary transition-colors line-clamp-1">
+                          {title}
+                        </h3>
+                      </Link>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
+                        {description}
+                      </p>
+                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
+                        <span className="text-lg font-bold text-primary">
+                          ${parseFloat(priceStr).toFixed(2)}
+                        </span>
+                        <Button size="sm" onClick={() => handleAddToCart(node)}>
+                          <ShoppingCart className="w-4 h-4 mr-2" />
+                          Add
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           ) : (
             <div className="text-center py-24 bg-muted/30 rounded-lg">

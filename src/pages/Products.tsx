@@ -141,15 +141,33 @@ const Products = () => {
                     {filteredProducts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {filteredProducts.map((product) => {
-                                // Attempt to match with mock data for wholesale pricing
-                                const mockProduct = MOCK_PRODUCTS.find(mp => mp.title === product.title || mp.id === product.handle);
+                                const node = product.node || product; // Handle different structures
+
+                                // Safely access properties
+                                const title = node.title || "";
+                                const handle = node.handle || node.id;
+                                const description = node.description || "";
+
+                                // Price handling
+                                let priceStr = "0.00";
+                                let currencyCode = "AUD";
+
+                                if (node.priceRange?.minVariantPrice?.amount) {
+                                    priceStr = node.priceRange.minVariantPrice.amount;
+                                    currencyCode = node.priceRange.minVariantPrice.currencyCode;
+                                } else if (typeof node.price === 'number') {
+                                    priceStr = node.price.toFixed(2);
+                                }
+
+                                const price = parseFloat(priceStr);
+
+                                // Attempt to match with mock data for wholesale pricing lookup
+                                const mockProduct = MOCK_PRODUCTS.find(mp => mp.title === title || mp.id === handle);
 
                                 let pricing;
                                 if (mockProduct) {
                                     pricing = getProductPrice(mockProduct, user?.isWholesale || false);
                                 } else {
-                                    // Fallback if no mock data found (use real Shopify price)
-                                    const price = parseFloat(product.priceRange.minVariantPrice.amount);
                                     pricing = {
                                         price: price,
                                         isWholesalePrice: false,
@@ -157,15 +175,24 @@ const Products = () => {
                                     };
                                 }
 
-                                const mainImage = product.images.edges[0]?.node.url;
+                                // Image handling
+                                let mainImage = null;
+                                if (node.images?.edges?.[0]?.node?.url) {
+                                    mainImage = node.images.edges[0].node.url;
+                                } else if (Array.isArray(node.images) && node.images.length > 0) {
+                                    // Handle mock data flat array
+                                    mainImage = node.images[0];
+                                } else if (node.image) {
+                                    mainImage = node.image;
+                                }
 
                                 return (
-                                    <Card key={product.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col">
+                                    <Card key={node.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col">
                                         <div className="aspect-square bg-muted relative overflow-hidden">
                                             {mainImage ? (
                                                 <img
                                                     src={mainImage}
-                                                    alt={product.title}
+                                                    alt={title}
                                                     className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                                                 />
                                             ) : (
@@ -180,20 +207,20 @@ const Products = () => {
                                             )}
                                         </div>
                                         <CardContent className="p-4 flex flex-col flex-1">
-                                            <Link to={`/product/${product.handle}`} className="block mb-2">
+                                            <Link to={`/product/${handle}`} className="block mb-2">
                                                 <h3 className="font-semibold text-lg group-hover:text-secondary transition-colors line-clamp-1">
-                                                    {product.title}
+                                                    {title}
                                                 </h3>
                                             </Link>
                                             <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-1">
-                                                {product.description}
+                                                {description}
                                             </p>
 
                                             {/* Display options if any (e.g. sizes) - Simplified for grid */}
-                                            {product.variants.edges.length > 1 && (
+                                            {((node.variants?.edges?.length || 0) > 1 || (node.sizes?.length || 0) > 1) && (
                                                 <div className="flex flex-wrap gap-1 mb-4">
                                                     <Badge variant="secondary" className="text-xs">
-                                                        {product.variants.edges.length} sizes
+                                                        {node.variants?.edges?.length || node.sizes?.length || 0} sizes
                                                     </Badge>
                                                 </div>
                                             )}
