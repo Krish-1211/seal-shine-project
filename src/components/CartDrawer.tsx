@@ -14,14 +14,14 @@ import { useCartStore } from "@/stores/cartStore";
 
 export const CartDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { 
-    items, 
-    isLoading, 
-    updateQuantity, 
-    removeItem, 
-    createCheckout 
+  const {
+    items,
+    isLoading,
+    updateQuantity,
+    removeItem,
+    createCheckout
   } = useCartStore();
-  
+
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
 
@@ -30,7 +30,7 @@ export const CartDrawer = () => {
       await createCheckout();
       const checkoutUrl = useCartStore.getState().checkoutUrl;
       if (checkoutUrl) {
-        window.open(checkoutUrl, '_blank');
+        window.location.href = checkoutUrl;
         setIsOpen(false);
       }
     } catch (error) {
@@ -50,7 +50,7 @@ export const CartDrawer = () => {
           )}
         </Button>
       </SheetTrigger>
-      
+
       <SheetContent className="w-full sm:max-w-lg flex flex-col h-full">
         <SheetHeader className="flex-shrink-0">
           <SheetTitle>Shopping Cart</SheetTitle>
@@ -58,7 +58,7 @@ export const CartDrawer = () => {
             {totalItems === 0 ? "Your cart is empty" : `${totalItems} item${totalItems !== 1 ? 's' : ''} in your cart`}
           </SheetDescription>
         </SheetHeader>
-        
+
         <div className="flex flex-col flex-1 pt-6 min-h-0">
           {items.length === 0 ? (
             <div className="flex-1 flex items-center justify-center">
@@ -82,7 +82,7 @@ export const CartDrawer = () => {
                           />
                         )}
                       </div>
-                      
+
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium truncate">{item.product.node.title}</h4>
                         <p className="text-sm text-muted-foreground">
@@ -92,7 +92,7 @@ export const CartDrawer = () => {
                           {item.price.currencyCode} ${parseFloat(item.price.amount).toFixed(2)}
                         </p>
                       </div>
-                      
+
                       <div className="flex flex-col items-end gap-2 flex-shrink-0">
                         <Button
                           variant="ghost"
@@ -102,7 +102,7 @@ export const CartDrawer = () => {
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
-                        
+
                         <div className="flex items-center gap-1">
                           <Button
                             variant="outline"
@@ -127,7 +127,7 @@ export const CartDrawer = () => {
                   ))}
                 </div>
               </div>
-              
+
               <div className="flex-shrink-0 space-y-4 pt-4 border-t bg-background">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold">Total</span>
@@ -135,10 +135,10 @@ export const CartDrawer = () => {
                     {items[0]?.price.currencyCode || '$'} ${totalPrice.toFixed(2)}
                   </span>
                 </div>
-                
-                <Button 
+
+                <Button
                   onClick={handleCheckout}
-                  className="w-full" 
+                  className="w-full"
                   size="lg"
                   disabled={items.length === 0 || isLoading}
                 >

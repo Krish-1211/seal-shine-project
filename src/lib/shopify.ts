@@ -110,109 +110,40 @@ export const STOREFRONT_QUERY = `
   }
 `;
 
-const CART_CREATE_MUTATION = `
-  mutation cartCreate($input: CartInput!) {
-    cartCreate(input: $input) {
-      cart {
-        id
-        checkoutUrl
-        totalQuantity
-        cost {
-          totalAmount {
-            amount
-            currencyCode
-          }
-        }
-        lines(first: 100) {
-          edges {
-            node {
-              id
-              quantity
-              merchandise {
-                ... on ProductVariant {
-                  id
-                  title
-                  price {
-                    amount
-                    currencyCode
-                  }
-                  product {
-                    title
-                    handle
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-      userErrors {
-        field
-        message
-      }
+
+// Helper to extract numeric ID from GraphQL ID
+function getNumericId(id: string): string {
+  if (!id) return '';
+  try {
+    // Check if it's already numeric
+    if (/^\d+$/.test(id)) return id;
+
+    // Check if it's a base64 encoded GID
+    if (id.includes('gid://')) {
+      // It might be already decoded if it looks like "gid://shopify/ProductVariant/123"
+      const parts = id.split('/');
+      return parts[parts.length - 1];
     }
+
+    // Try decoding base64 if it's opaque
+    const decoded = atob(id);
+    if (decoded.includes('gid://')) {
+      const parts = decoded.split('/');
+      return parts[parts.length - 1];
+    }
+
+    return id;
+  } catch (e) {
+    return id;
   }
-`;
-
-export async function storefrontApiRequest(query: string, variables: any = {}) {
-  const response = await fetch(SHOPIFY_STOREFRONT_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN
-    },
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
-  });
-
-  if (response.status === 402) {
-    toast.error("Shopify: Payment required", {
-      description: "Shopify API access requires an active billing plan. Visit https://admin.shopify.com to upgrade.",
-    });
-    return;
-  }
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
-
-  if (data.errors) {
-    throw new Error(`Error calling Shopify: ${data.errors.map((e: any) => e.message).join(', ')}`);
-  }
-
-  return data;
 }
 
 export async function createStorefrontCheckout(items: any[]): Promise<string> {
-  try {
-    const lines = items.map(item => ({
-      quantity: item.quantity,
-      merchandiseId: item.variantId,
-    }));
+  const lineItems = items.map(item => {
+    const variantId = getNumericId(item.variantId);
+    return `${variantId}:${item.quantity}`;
+  });
 
-    const cartData = await storefrontApiRequest(CART_CREATE_MUTATION, {
-      input: { lines },
-    });
-
-    if (cartData.data.cartCreate.userErrors.length > 0) {
-      throw new Error(`Cart creation failed: ${cartData.data.cartCreate.userErrors.map((e: any) => e.message).join(', ')}`);
-    }
-
-    const cart = cartData.data.cartCreate.cart;
-
-    if (!cart.checkoutUrl) {
-      throw new Error('No checkout URL returned from Shopify');
-    }
-
-    const url = new URL(cart.checkoutUrl);
-    url.searchParams.set('channel', 'online_store');
-    return url.toString();
-  } catch (error) {
-    console.error('Error creating storefront checkout:', error);
-    throw error;
-  }
+  const checkoutUrl = `https://${SHOPIFY_STORE_PERMANENT_DOMAIN}/cart/${lineItems.join(',')}`;
+  return checkoutUrl;
 }
