@@ -138,6 +138,40 @@ function getNumericId(id: string): string {
   }
 }
 
+
+export async function storefrontApiRequest(query: string, variables: any = {}) {
+  const response = await fetch(SHOPIFY_STOREFRONT_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN
+    },
+    body: JSON.stringify({
+      query,
+      variables,
+    }),
+  });
+
+  if (response.status === 402) {
+    toast.error("Shopify: Payment required", {
+      description: "Shopify API access requires an active billing plan. Visit https://admin.shopify.com to upgrade.",
+    });
+    return;
+  }
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if (data.errors) {
+    throw new Error(`Error calling Shopify: ${data.errors.map((e: any) => e.message).join(', ')}`);
+  }
+
+  return data;
+}
+
 export async function createStorefrontCheckout(items: any[]): Promise<string> {
   const lineItems = items.map(item => {
     const variantId = getNumericId(item.variantId);
