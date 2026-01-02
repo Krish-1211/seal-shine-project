@@ -71,6 +71,7 @@ export interface Product {
   packageType: string;
   technicalData?: string;
   images?: string[];
+  variantIds?: string[];
 }
 
 export const MOCK_PRODUCTS: Product[] = [

@@ -41,7 +41,7 @@ export const useShopifyProducts = () => {
             variants: {
               edges: p.sizes.map((size, idx) => ({
                 node: {
-                  id: `${p.id}-${idx}`, // Note: This will cause 404 in checkout if not replaced with real ID
+                  id: p.variantIds && p.variantIds[idx] ? `gid://shopify/ProductVariant/${p.variantIds[idx]}` : `${p.id}-${idx}`,
                   title: size,
                   sku: p.codes && p.codes[idx] ? p.codes[idx] : "",
                   price: {
@@ -103,7 +103,7 @@ export const useShopifyProduct = (handle: string) => {
         variants: {
           edges: p.sizes.map((size, idx) => ({
             node: {
-              id: `${p.id}-${idx}`,
+              id: p.variantIds && p.variantIds[idx] ? `gid://shopify/ProductVariant/${p.variantIds[idx]}` : `${p.id}-${idx}`, // Use real variant ID if available
               title: size,
               sku: p.codes && p.codes[idx] ? p.codes[idx] : "",
               price: {
