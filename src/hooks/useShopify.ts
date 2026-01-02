@@ -103,7 +103,7 @@ export const useShopifyProduct = (handle: string) => {
         variants: {
           edges: p.sizes.map((size, idx) => ({
             node: {
-              id: p.variantIds && p.variantIds[idx] ? `gid://shopify/ProductVariant/${p.variantIds[idx]}` : `${p.id}-${idx}`, // Use real variant ID if available
+              id: p.variantIds && p.variantIds[idx] ? `gid://shopify/ProductVariant/${p.variantIds[idx]}` : `${p.id}-${idx}`,
               title: size,
               sku: p.codes && p.codes[idx] ? p.codes[idx] : "",
               price: {

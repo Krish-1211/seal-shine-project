@@ -105,6 +105,7 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["GTS1U", "GTS4U", "GTS20D"],
     packageType: "Unit / Drum",
     technicalData: "/technical_data/grout,tileandstonecleaner(concrete).pdf",
+    variantIds: ["43226589855809", "43226589888577", "43226589921345"],
     images: [
       "/images/cleaner_gts1u_group.png",
       "/images/cleaner_gts1u.png"
@@ -327,6 +328,7 @@ export const MOCK_PRODUCTS: Product[] = [
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
     codes: ["24P1U", "24P4U", "24P20D"],
     packageType: "Unit / Drum",
+    variantIds: ["43225363513409"],
     images: [
       "/images/sealer_24p1u_wb_group.jpg",
       "/images/24_7_plus_stone_concrete_sealer.png"

@@ -51,7 +51,7 @@ const Index = () => {
 
     const cartItem = {
       product: cartItemProduct,
-      variantId: product.variants?.edges?.[0]?.node?.id || product.id, // Fallback if no variants
+      variantId: product.variants?.edges?.[0]?.node?.id || "", // MUST be a real variant ID
       variantTitle: product.variants?.edges?.[0]?.node?.title || "Default",
       price: {
         amount: product.priceRange?.minVariantPrice?.amount || (typeof (product as any).price === 'number' ? (product as any).price.toFixed(2) : "0.00"),
