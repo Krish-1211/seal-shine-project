@@ -26,7 +26,7 @@ export const useShopifyProducts = () => {
             tags: [],
             priceRange: {
               minVariantPrice: {
-                amount: p.price.toFixed(2),
+                amount: (p.prices ? Math.min(...p.prices) : p.price).toFixed(2),
                 currencyCode: "AUD"
               }
             },
@@ -45,7 +45,7 @@ export const useShopifyProducts = () => {
                   title: size,
                   sku: p.codes && p.codes[idx] ? p.codes[idx] : "",
                   price: {
-                    amount: p.price.toFixed(2),
+                    amount: (p.prices && p.prices[idx] ? p.prices[idx] : p.price).toFixed(2),
                     currencyCode: "AUD"
                   },
                   availableForSale: true,
@@ -88,7 +88,7 @@ export const useShopifyProduct = (handle: string) => {
         tags: [],
         priceRange: {
           minVariantPrice: {
-            amount: p.price.toFixed(2),
+            amount: (p.prices ? Math.min(...p.prices) : p.price).toFixed(2),
             currencyCode: "AUD"
           }
         },
@@ -107,7 +107,7 @@ export const useShopifyProduct = (handle: string) => {
               title: size,
               sku: p.codes && p.codes[idx] ? p.codes[idx] : "",
               price: {
-                amount: p.price.toFixed(2),
+                amount: (p.prices && p.prices[idx] ? p.prices[idx] : p.price).toFixed(2),
                 currencyCode: "AUD"
               },
               availableForSale: true,
