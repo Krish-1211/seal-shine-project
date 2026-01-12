@@ -39,8 +39,7 @@ const ProductDetail = () => {
     p.title === productData?.title
   );
 
-  const currentVariantPrice = currentVariant ? parseFloat(currentVariant.price.amount) : undefined;
-  const pricing = mockProduct ? getProductPrice(mockProduct, user?.isWholesale || false, currentVariantPrice) : null;
+  const pricing = mockProduct ? getProductPrice(mockProduct, user?.isWholesale || false, selectedVariantIndex) : null;
 
   const handleAddToCart = () => {
     if (!productData) return;

@@ -8,31 +8,63 @@ export interface PriceResult {
     description?: string;
 }
 
-export const getProductPrice = (product: Product, isWholesale: boolean, priceOverride?: number): PriceResult => {
-    // If a specific variant price is provided appropriately
-    if (priceOverride !== undefined && priceOverride !== product.price) {
+// If a specific variant price is provided, we can look up wholesale price by index usually... 
+// But we need the index to find the wholesale counterpart. 
+// Let's modify the signature to accept index or just handle simple case of flat wholesalePrice if index not provided
+// BUT we need to support "variantIndex" now as planned.
+
+export const getProductPrice = (product: Product, isWholesale: boolean, variantIndex?: number): PriceResult => {
+    // Standard retail price calculation
+    let currentRetailPrice = product.price;
+    if (variantIndex !== undefined && product.prices && product.prices[variantIndex] !== undefined) {
+        currentRetailPrice = product.prices[variantIndex];
+    } else if (variantIndex === undefined && product.prices && product.prices.length > 0) {
+        // Default to first price? Or keep base price
+        currentRetailPrice = product.prices[0] || product.price;
+    }
+
+    if (!isWholesale) {
         return {
-            price: priceOverride,
+            price: currentRetailPrice,
             isWholesalePrice: false,
-            displayPrice: `$${priceOverride.toFixed(2)}`
+            displayPrice: `$${currentRetailPrice.toFixed(2)}`
         };
     }
 
-    // If not wholesale user, or no wholesale price exists, return standard price
-    if (!isWholesale || !product.wholesalePrice) {
+    // Wholesale calculation
+    let currentWholesalePrice: number | undefined;
+
+    if (variantIndex !== undefined) {
+        // Try getting from array at index
+        if (product.wholesalePrices && product.wholesalePrices[variantIndex] !== undefined) {
+            currentWholesalePrice = product.wholesalePrices[variantIndex];
+        }
+    } else {
+        // Default index 0
+        if (product.wholesalePrices && product.wholesalePrices.length > 0) {
+            currentWholesalePrice = product.wholesalePrices[0];
+        }
+    }
+
+    // Fallback to old field if array missing or index fail
+    if (currentWholesalePrice === undefined) {
+        currentWholesalePrice = product.wholesalePrice;
+    }
+
+    if (currentWholesalePrice === undefined) {
+        // No wholesale price found, show retail
         return {
-            price: product.price,
+            price: currentRetailPrice,
             isWholesalePrice: false,
-            displayPrice: `$${product.price.toFixed(2)}`
+            displayPrice: `$${currentRetailPrice.toFixed(2)}`
         };
     }
 
-    // Wholesale user AND wholesale price exists (Only applies to default variant for now)
     return {
-        price: product.wholesalePrice,
-        originalPrice: product.price,
+        price: currentWholesalePrice,
+        originalPrice: currentRetailPrice,
         isWholesalePrice: true,
-        displayPrice: `$${product.wholesalePrice.toFixed(2)}`,
-        description: "Wholesale Price"
+        displayPrice: `$${currentWholesalePrice.toFixed(2)}`,
+        description: "Trade Price (Exc. GST)"
     };
 };

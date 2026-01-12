@@ -19,9 +19,15 @@ const CustomerLogin = () => {
 
         // Mock authentication
         if (password.length > 0) {
-            login(email);
+            const success = login(email, password);
+            if (!success) {
+                toast.error("Invalid credentials", {
+                    description: "Please check your email and password."
+                });
+                return;
+            }
 
-            if (email.includes("wholesale")) {
+            if (email === "wholesale@example.com") {
                 toast.success("Welcome back, Wholesale Partner!", {
                     description: "You now have access to wholesale pricing."
                 });
@@ -30,6 +36,7 @@ const CustomerLogin = () => {
                     description: "You are successfully logged in."
                 });
             }
+
 
             navigate("/");
         } else {

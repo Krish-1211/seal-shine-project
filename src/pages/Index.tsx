@@ -13,6 +13,9 @@ import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
 import { ShopifyProduct } from "@/lib/shopify";
 import { useShopifyProducts } from "@/hooks/useShopify";
+import { getProductPrice } from "@/lib/pricing";
+import { MOCK_PRODUCTS } from "@/lib/mockData";
+import { useUser } from "@/contexts/UserContext";
 
 
 
@@ -21,6 +24,7 @@ const Index = () => {
   const categoryFilter = searchParams.get("category");
   const searchQuery = searchParams.get("search") || "";
   const addItem = useCartStore(state => state.addItem);
+  const { user } = useUser();
 
   const { data: products, isLoading, error } = useShopifyProducts();
 
@@ -156,6 +160,22 @@ const Index = () => {
                   priceStr = node.price.toFixed(2);
                 }
 
+                const price = parseFloat(priceStr);
+
+                // Attempt to match with mock data for wholesale pricing lookup
+                const mockProduct = MOCK_PRODUCTS.find(mp => mp.title === title || mp.id === handle);
+
+                let pricing;
+                if (mockProduct) {
+                  pricing = getProductPrice(mockProduct, user?.isWholesale || false);
+                } else {
+                  pricing = {
+                    price: price,
+                    isWholesalePrice: false,
+                    displayPrice: `$${price.toFixed(2)}`
+                  };
+                }
+
                 return (
                   <Card key={node.id} className="overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col">
                     <div className="aspect-square bg-muted relative overflow-hidden">
@@ -175,9 +195,16 @@ const Index = () => {
                         {description}
                       </p>
                       <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
-                        <span className="text-lg font-bold text-primary">
-                          ${parseFloat(priceStr).toFixed(2)}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-lg font-bold text-primary">
+                            {pricing.displayPrice}
+                          </span>
+                          {pricing.isWholesalePrice && (
+                            <span className="text-xs text-muted-foreground line-through">
+                              ${pricing.originalPrice?.toFixed(2)}
+                            </span>
+                          )}
+                        </div>
                         <Button size="sm" onClick={() => handleAddToCart(node)}>
                           <ShoppingCart className="w-4 h-4 mr-2" />
                           Add
