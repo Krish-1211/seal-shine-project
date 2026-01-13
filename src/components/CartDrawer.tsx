@@ -9,32 +9,46 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide-react";
+import {
+  ShoppingCart,
+  Minus,
+  Plus,
+  Trash2,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
+import { useUser } from "@/contexts/UserContext";
 
 export const CartDrawer = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useUser();
+
   const {
     items,
     isLoading,
     updateQuantity,
     removeItem,
-    createCheckout
+    createCheckout,
   } = useCartStore();
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce((sum, item) => sum + (parseFloat(item.price.amount) * item.quantity), 0);
+  const totalPrice = items.reduce(
+    (sum, item) => sum + parseFloat(item.price.amount) * item.quantity,
+    0
+  );
 
   const handleCheckout = async () => {
     try {
       await createCheckout();
       const checkoutUrl = useCartStore.getState().checkoutUrl;
       console.log("Redirecting to:", checkoutUrl);
+
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
       }
     } catch (error) {
-      console.error('Checkout failed:', error);
+      console.error("Checkout failed:", error);
     }
   };
 
@@ -55,7 +69,9 @@ export const CartDrawer = () => {
         <SheetHeader className="flex-shrink-0">
           <SheetTitle>Shopping Cart</SheetTitle>
           <SheetDescription>
-            {totalItems === 0 ? "Your cart is empty" : `${totalItems} item${totalItems !== 1 ? 's' : ''} in your cart`}
+            {totalItems === 0
+              ? "Your cart is empty"
+              : `${totalItems} item${totalItems !== 1 ? "s" : ""} in your cart`}
           </SheetDescription>
         </SheetHeader>
 
@@ -76,7 +92,9 @@ export const CartDrawer = () => {
                       <div className="w-16 h-16 bg-muted rounded-md overflow-hidden flex-shrink-0">
                         {item.product.node.images?.edges?.[0]?.node && (
                           <img
-                            src={item.product.node.images.edges[0].node.url}
+                            src={
+                              item.product.node.images.edges[0].node.url
+                            }
                             alt={item.product.node.title}
                             className="w-full h-full object-cover"
                           />
@@ -84,9 +102,13 @@ export const CartDrawer = () => {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium truncate">{item.product.node.title}</h4>
+                        <h4 className="font-medium truncate">
+                          {item.product.node.title}
+                        </h4>
                         <p className="text-sm text-muted-foreground">
-                          {item.selectedOptions.map(option => option.value).join(' • ')}
+                          {item.selectedOptions
+                            .map((option) => option.value)
+                            .join(" • ")}
                         </p>
                         <p className="font-semibold">
                           {item.price.currencyCode} ${parseFloat(item.price.amount).toFixed(2)}
@@ -98,7 +120,9 @@ export const CartDrawer = () => {
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6"
-                          onClick={() => removeItem(item.variantId)}
+                          onClick={() =>
+                            removeItem(item.variantId)
+                          }
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -108,16 +132,28 @@ export const CartDrawer = () => {
                             variant="outline"
                             size="icon"
                             className="h-6 w-6"
-                            onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(
+                                item.variantId,
+                                item.quantity - 1
+                              )
+                            }
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="w-8 text-center text-sm">{item.quantity}</span>
+                          <span className="w-8 text-center text-sm">
+                            {item.quantity}
+                          </span>
                           <Button
                             variant="outline"
                             size="icon"
                             className="h-6 w-6"
-                            onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                            onClick={() =>
+                              updateQuantity(
+                                item.variantId,
+                                item.quantity + 1
+                              )
+                            }
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
@@ -132,7 +168,8 @@ export const CartDrawer = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold">Total</span>
                   <span className="text-xl font-bold">
-                    {items[0]?.price.currencyCode || '$'} ${totalPrice.toFixed(2)}
+                    {items[0]?.price.currencyCode || "$"} $
+                    {totalPrice.toFixed(2)}
                   </span>
                 </div>
 

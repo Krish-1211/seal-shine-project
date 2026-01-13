@@ -82,7 +82,19 @@ export const getShopifyAccessToken = () => {
             shopifyAccessToken = fs.readFileSync(TOKEN_PATH, 'utf8').trim();
             return shopifyAccessToken;
         }
-        throw new Error("Shopify OAuth token not initialized. Run OAuth first.");
+
+        // AGGRESSIVE FALLBACK: Check every possible name the user might have used
+        const staticToken = process.env.SHOPIFY_ADMIN_TOKEN ||
+            process.env.SHOPIFY_ACCESS_TOKEN ||
+            process.env.SHOPIFY_API_PASSWORD ||
+            process.env.VITE_SHOPIFY_ADMIN_TOKEN;
+
+        if (staticToken) {
+            console.log("Using static Shopify token from environment variables.");
+            return staticToken;
+        }
+
+        throw new Error("Shopify OAuth token not initialized and no static token found in .env. Please add SHOPIFY_ADMIN_TOKEN to .env");
     }
     return shopifyAccessToken;
 };

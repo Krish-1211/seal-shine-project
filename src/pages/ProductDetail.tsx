@@ -26,44 +26,48 @@ import { getProductPrice } from "@/lib/pricing";
 const ProductDetail = () => {
   const { handle } = useParams();
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+  const [selectedSize, setSelectedSize] = useState<string>("");
   const addItem = useCartStore(state => state.addItem);
   const { user } = useUser();
 
   const { data: productData, isLoading } = useShopifyProduct(handle || "");
 
-  const currentVariant = productData?.variants.edges[selectedVariantIndex]?.node;
+  // 1. FILTER VARIANTS based on User Type
+  const isWholesaleUser = !!user?.isWholesale;
+  const relevantVariants = productData?.variants.edges.filter(({ node }) => {
+    const isWholesaleVariant = node.title.toLowerCase().includes("wholesale") || node.sku.endsWith("-W");
+    return isWholesaleUser ? isWholesaleVariant : !isWholesaleVariant;
+  }) || [];
 
-  const mockProduct = MOCK_PRODUCTS.find(p =>
-    p.codes.includes(currentVariant?.sku || "") ||
-    p.title === productData?.title
-  );
+  // Auto-select first available variant when data loads
+  // We use useEffect to set the initial selection only when data arrives
+  if (relevantVariants.length > 0 && !selectedSize) {
+    const firstVariantName = relevantVariants[0].node.title.replace(" Wholesale", "");
+    setSelectedSize(firstVariantName);
+  }
 
-  const pricing = mockProduct ? getProductPrice(mockProduct, user?.isWholesale || false, selectedVariantIndex) : null;
+  // Find the currently selected variant object based on the "clean" size name
+  const currentVariant = relevantVariants.find(v =>
+    v.node.title.replace(" Wholesale", "") === selectedSize
+  )?.node;
 
   const handleAddToCart = () => {
-    if (!productData) return;
-
-    const variant = productData.variants.edges[selectedVariantIndex]?.node;
-    if (!variant) return;
+    if (!productData || !currentVariant) return;
 
     const product = {
       node: productData
     } as ShopifyProduct;
 
-    // Use wholesale price if applicable, otherwise fallback to variant price
-    const finalPrice = pricing?.isWholesalePrice ? pricing.price.toString() : variant.price.amount;
-
     const cartItem = {
       product,
-      variantId: variant.id,
-      variantTitle: variant.title,
+      variantId: currentVariant.id,
+      variantTitle: currentVariant.title,
       price: {
-        amount: finalPrice,
-        currencyCode: variant.price.currencyCode
+        amount: currentVariant.price.amount,
+        currencyCode: currentVariant.price.currencyCode
       },
       quantity,
-      selectedOptions: variant.selectedOptions || []
+      selectedOptions: currentVariant.selectedOptions || []
     };
 
     addItem(cartItem);
@@ -97,11 +101,7 @@ const ProductDetail = () => {
     );
   }
 
-  // Reload current variant and main image since hooks might return after render
-  // const currentVariant variable is now defined above to support pricing
-
-  const mainImage = productData.images.edges[0]?.node;
-  const technicalData = mockProduct?.technicalData;
+  const technicalData = MOCK_PRODUCTS.find(p => p.title === productData.title)?.technicalData;
 
   return (
     <div className="min-h-screen bg-background">
@@ -155,11 +155,7 @@ const ProductDetail = () => {
               <Card>
                 <CardContent className="p-6">
                   <h3 className="font-semibold mb-4">Technical Data</h3>
-                  <a
-                    href={technicalData}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href={technicalData} target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" className="w-full sm:w-auto">
                       <ShieldCheck className="w-4 h-4 mr-2" />
                       Technical Data Sheet (PDF)
@@ -173,24 +169,18 @@ const ProductDetail = () => {
           {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <Badge className="mb-2">In Stock</Badge>
+              <div className="flex items-center gap-2 mb-2">
+                <Badge>In Stock</Badge>
+                {isWholesaleUser && <Badge variant="secondary">Wholesale Pricing Active</Badge>}
+              </div>
               <h1 className="text-4xl font-bold mb-4">{productData.title}</h1>
               <div className="flex flex-col">
-                {pricing ? (
-                  <>
-                    <p className="text-3xl font-bold text-primary">
-                      {pricing.displayPrice}
-                    </p>
-                    {pricing.isWholesalePrice && (
-                      <p className="text-sm text-muted-foreground line-through">
-                        ${pricing.originalPrice?.toFixed(2)}
-                      </p>
-                    )}
-                  </>
-                ) : (
+                {currentVariant ? (
                   <p className="text-3xl font-bold text-primary">
-                    ${parseFloat(currentVariant?.price.amount || '0').toFixed(2)} {currentVariant?.price.currencyCode}
+                    ${parseFloat(currentVariant.price.amount).toFixed(2)} {currentVariant.price.currencyCode}
                   </p>
+                ) : (
+                  <p className="text-muted-foreground">Select a size</p>
                 )}
               </div>
               <p className="text-sm text-muted-foreground mt-1">GST inclusive</p>
@@ -201,7 +191,6 @@ const ProductDetail = () => {
 
             <Separator />
 
-            {/* Description */}
             {productData.description && (
               <div>
                 <h3 className="font-semibold mb-2">Product Overview</h3>
@@ -210,19 +199,23 @@ const ProductDetail = () => {
             )}
 
             {/* Variant Selection */}
-            {productData.variants.edges.length > 1 && (
+            {relevantVariants.length > 0 && (
               <div>
                 <h3 className="font-semibold mb-3">Select Size</h3>
                 <div className="flex flex-wrap gap-2">
-                  {productData.variants.edges.map((variant, idx) => (
-                    <Button
-                      key={variant.node.id}
-                      variant={selectedVariantIndex === idx ? "default" : "outline"}
-                      onClick={() => setSelectedVariantIndex(idx)}
-                    >
-                      {variant.node.title}
-                    </Button>
-                  ))}
+                  {relevantVariants.map((variant) => {
+                    // Clean up name for display (remove ' Wholesale')
+                    const cleanTitle = variant.node.title.replace(" Wholesale", "");
+                    return (
+                      <Button
+                        key={variant.node.id}
+                        variant={selectedSize === cleanTitle ? "default" : "outline"}
+                        onClick={() => setSelectedSize(cleanTitle)}
+                      >
+                        {cleanTitle}
+                      </Button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -253,13 +246,13 @@ const ProductDetail = () => {
               size="lg"
               className="w-full bg-secondary hover:bg-secondary/90"
               onClick={handleAddToCart}
+              disabled={!currentVariant}
             >
               Add to Cart
             </Button>
 
             <Separator />
 
-            {/* Features */}
             <Card>
               <CardContent className="p-6 space-y-3">
                 <h3 className="font-semibold">Product Features</h3>

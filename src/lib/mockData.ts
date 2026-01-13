@@ -74,6 +74,7 @@ export interface Product {
   technicalData?: string;
   images?: string[];
   variantIds?: string[];
+  wholesaleVariantIds?: string[];
 }
 
 export const MOCK_PRODUCTS: Product[] = [
@@ -357,6 +358,8 @@ export const MOCK_PRODUCTS: Product[] = [
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
     codes: ["PP1U", "PP4U", "PP20D"],
     packageType: "Bottle / Drum",
+    variantIds: ["43258412171329", "43258412204097", "43258412236865"],
+    wholesaleVariantIds: ["43258412269633", "43258412302401", "43258412335169"],
     images: [
       "/images/sealer_pp1u_group.jpg",
       "/images/premium_plus_sealer.png"

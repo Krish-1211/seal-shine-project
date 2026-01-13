@@ -45,21 +45,35 @@ const Index = () => {
   }, [products, searchQuery, categoryFilter]);
 
   const handleAddToCart = (product: ShopifyProduct["node"]) => {
-    // Map the Shopify product node to the structure expected by the cart
-    // The hook returns the 'node' directly, so we wrap it back if needed or adjust the cart store.
-    // Looking at cartStore, it expects { product: ShopifyProduct, ... }
-    // But ShopifyProduct interface in shopify.ts is { node: { ... } }
-    // Let's construct the object the cart expects.
+    // Intelligent Variant Selection
+    const isWholesaleUser = !!user?.isWholesale;
+    const variants = product.variants?.edges || [];
+
+    // Find the best matching variant for this user
+    // 1. If Wholesaler -> Look for 'Wholesale' in title or '-W' SKU
+    // 2. If Retail -> Look for standard variant (NOT Wholesale)
+    const targetVariant = variants.find(({ node }) => {
+      const isWholesaleVariant = node.title.toLowerCase().includes("wholesale") || node.sku?.endsWith("-W");
+      return isWholesaleUser ? isWholesaleVariant : !isWholesaleVariant;
+    })?.node;
+
+    // Fallback to first variant
+    const variantToAdd = targetVariant || variants[0]?.node;
+
+    if (!variantToAdd) {
+      toast.error("No variant available");
+      return;
+    }
 
     const cartItemProduct: ShopifyProduct = { node: product };
 
     const cartItem = {
       product: cartItemProduct,
-      variantId: product.variants?.edges?.[0]?.node?.id || "", // MUST be a real variant ID
-      variantTitle: product.variants?.edges?.[0]?.node?.title || "Default",
+      variantId: variantToAdd.id,
+      variantTitle: variantToAdd.title,
       price: {
-        amount: product.priceRange?.minVariantPrice?.amount || (typeof (product as any).price === 'number' ? (product as any).price.toFixed(2) : "0.00"),
-        currencyCode: product.priceRange?.minVariantPrice?.currencyCode || "AUD"
+        amount: variantToAdd.price.amount,
+        currencyCode: variantToAdd.price.currencyCode
       },
       quantity: 1,
       selectedOptions: []

@@ -21,6 +21,7 @@ const Products = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const addItem = useCartStore(state => state.addItem);
     const { user } = useUser();
+    console.log("DEBUG RENDER: Products User Context:", user);
 
     // Fetch real products from Shopify
     const { data: products, isLoading } = useShopifyProducts();
@@ -42,27 +43,46 @@ const Products = () => {
     }, [products, searchQuery, categoryFilter]);
 
     const handleAddToCart = (product: ShopifyProduct['node'], price: string) => {
-        const defaultVariant = product.variants.edges[0]?.node;
-        if (!defaultVariant) {
+        // Intelligent Variant Selection
+        const isWholesaleUser = !!user?.isWholesale;
+        const variants = product.variants.edges;
+
+        console.log("DEBUG: AddToCart - User is Wholesale?", isWholesaleUser);
+        console.log("DEBUG: AddToCart - Available Variants:", variants.map(v => v.node.title));
+
+        // Find the best matching variant for this user
+        // 1. If Wholesaler -> Look for 'Wholesale' in title or '-W' SKU
+        // 2. If Retail -> Look for standard variant (NOT Wholesale)
+        const targetVariant = variants.find(({ node }) => {
+            const isWholesaleVariant = node.title.toLowerCase().includes("wholesale") || node.sku?.endsWith("-W");
+            return isWholesaleUser ? isWholesaleVariant : !isWholesaleVariant;
+        })?.node;
+
+        console.log("DEBUG: AddToCart - Selected Variant:", targetVariant?.title);
+
+        // Fallback to first variant if no specific match found (e.g. maybe product has no wholesale version yet)
+        const variantToAdd = targetVariant || variants[0]?.node;
+
+        if (!variantToAdd) {
             toast.error("No variant available");
             return;
         }
 
         const cartItem = {
             product: { node: product },
-            variantId: defaultVariant.id, // REAL Globally Unique ID
-            variantTitle: defaultVariant.title,
+            variantId: variantToAdd.id,
+            variantTitle: variantToAdd.title,
             price: {
-                amount: price,
-                currencyCode: defaultVariant.price.currencyCode
+                amount: variantToAdd.price.amount, // Use real price from variant
+                currencyCode: variantToAdd.price.currencyCode
             },
             quantity: 1,
-            selectedOptions: defaultVariant.selectedOptions || []
+            selectedOptions: variantToAdd.selectedOptions || []
         };
 
         addItem(cartItem);
         toast.success("Added to cart", {
-            description: product.title,
+            description: `${product.title} (${variantToAdd.title})`,
             position: "top-center",
         });
     };

@@ -174,7 +174,9 @@ export async function storefrontApiRequest(query: string, variables: any = {}) {
 
 export async function createStorefrontCheckout(items: any[]): Promise<string> {
   const lineItems = items.map(item => {
+    console.log("DEBUG CHECKOUT - Item Variant ID:", item.variantId); // Log incoming ID
     const variantId = getNumericId(item.variantId);
+    console.log("DEBUG CHECKOUT - Parsed Numeric ID:", variantId);    // Log parsed result
     return `${variantId}:${item.quantity}`;
   });
 
