@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import fetch from 'node-fetch';
 
-const SHOPIFY_SHOP_DOMAIN = 'suresealsealants.myshopify.com';
+const SHOPIFY_SHOP_DOMAIN = 'sure-seal-sealants.myshopify.com';
 const API_VERSION = '2024-01';
 
 async function getStorefrontToken() {

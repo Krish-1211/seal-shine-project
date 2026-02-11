@@ -59,7 +59,7 @@ import { getShopifyAccessToken } from "./backend/shopifyAuth.js";
 app.get("/api/admin/products", async (req, res) => {
     try {
         const accessToken = getShopifyAccessToken();
-        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "suresealsealants.myshopify.com";
+        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "sure-seal-sealants.myshopify.com";
         const response = await axios.get(`https://${shop}/admin/api/2024-01/products.json`, {
             headers: {
                 "X-Shopify-Access-Token": accessToken,
@@ -79,7 +79,7 @@ app.get("/api/admin/products", async (req, res) => {
 app.get("/api/admin/orders", async (req, res) => {
     try {
         const accessToken = getShopifyAccessToken();
-        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "suresealsealants.myshopify.com";
+        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "sure-seal-sealants.myshopify.com";
         const response = await axios.get(`https://${shop}/admin/api/2024-01/orders.json?status=any`, {
             headers: {
                 "X-Shopify-Access-Token": accessToken,
@@ -99,7 +99,7 @@ app.get("/api/admin/orders", async (req, res) => {
 app.get("/api/admin/dashboard-stats", async (req, res) => {
     try {
         const accessToken = getShopifyAccessToken();
-        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "suresealsealants.myshopify.com";
+        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "sure-seal-sealants.myshopify.com";
         const headers = {
             "X-Shopify-Access-Token": accessToken,
             "Content-Type": "application/json"
@@ -168,7 +168,7 @@ app.get("/api/admin/dashboard-stats", async (req, res) => {
 app.get("/api/debug/token", async (req, res) => {
     try {
         const accessToken = getShopifyAccessToken();
-        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "suresealsealants.myshopify.com";
+        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "sure-seal-sealants.myshopify.com";
 
         // Create token
         const response = await axios.post(`https://${shop}/admin/api/2024-01/storefront_access_tokens.json`, {
@@ -188,7 +188,7 @@ app.get("/api/debug/token", async (req, res) => {
         // If create fails (maybe already exists?), list them
         try {
             const accessToken = getShopifyAccessToken();
-            const shop = process.env.SHOPIFY_SHOP_DOMAIN || "suresealsealants.myshopify.com";
+            const shop = process.env.SHOPIFY_SHOP_DOMAIN || "sure-seal-sealants.myshopify.com";
             const listRes = await axios.get(`https://${shop}/admin/api/2024-01/storefront_access_tokens.json`, {
                 headers: {
                     "X-Shopify-Access-Token": accessToken,
@@ -230,7 +230,7 @@ app.post("/api/create-wholesale-checkout", async (req, res) => {
     try {
         const { items, email } = req.body;
         const accessToken = getShopifyAccessToken();
-        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "suresealsealants.myshopify.com";
+        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "sure-seal-sealants.myshopify.com";
 
         console.log(`Creating wholesale checkout for ${email} with ${items.length} items.`);
 
@@ -288,7 +288,7 @@ app.post("/webhooks/orders/create", async (req, res) => {
         console.log(`📦 New Order ${order.name} received. Processing inventory sync...`);
 
         const accessToken = getShopifyAccessToken();
-        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "suresealsealants.myshopify.com";
+        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "sure-seal-sealants.myshopify.com";
         const headers = {
             "X-Shopify-Access-Token": accessToken,
             "Content-Type": "application/json"
