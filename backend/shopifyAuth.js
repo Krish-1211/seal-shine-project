@@ -21,13 +21,23 @@ try {
 
 export const startShopifyOAuth = (req, res) => {
     const shop = req.query.shop;
-    if (!shop) return res.status(400).send("Missing shop parameter");
+    if (!shop) return res.status(400).send("Missing shop parameter. Example: /auth?shop=my-store.myshopify.com");
+
+    const scopes = process.env.SHOPIFY_SCOPES || 'read_products,read_orders';
+    const redirectUri = process.env.SHOPIFY_REDIRECT_URI;
+
+    if (!redirectUri) {
+        return res.status(500).send("SHOPIFY_REDIRECT_URI not set in environment variables");
+    }
 
     const installUrl =
         `https://${shop}/admin/oauth/authorize` +
         `?client_id=${process.env.SHOPIFY_CLIENT_ID}` +
-        `&scope=read_products,write_products,read_inventory,write_inventory,read_locations,read_files,write_files,read_orders,write_orders,read_customers,write_customers` +
-        `&redirect_uri=${process.env.SHOPIFY_REDIRECT_URI}`;
+        `&scope=${scopes}` +
+        `&redirect_uri=${redirectUri}`;
+
+    console.log(`Initiating OAuth for ${shop}`);
+    console.log(`Redirecting to: ${installUrl}`);
 
     res.redirect(installUrl);
 };
