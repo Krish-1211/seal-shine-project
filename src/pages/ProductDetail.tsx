@@ -35,7 +35,7 @@ const ProductDetail = () => {
   // 1. FILTER VARIANTS based on User Type
   const isWholesaleUser = !!user?.isWholesale;
   const relevantVariants = productData?.variants.edges.filter(({ node }) => {
-    const isWholesaleVariant = node.title.toLowerCase().includes("wholesale") || node.sku.endsWith("-W");
+    const isWholesaleVariant = node.title.toLowerCase().includes("wholesale") || node.sku?.endsWith("-W");
     return isWholesaleUser ? isWholesaleVariant : !isWholesaleVariant;
   }) || [];
 

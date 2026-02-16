@@ -22,13 +22,23 @@ const About = () => {
                 {/* Introduction */}
                 <section className="py-16">
                     <div className="container mx-auto px-4">
-                        <div className="max-w-4xl mx-auto space-y-6 text-lg text-muted-foreground leading-relaxed text-center md:text-left">
-                            <p>
-                                With over two decades of trusted performance, we help builders, contractors, renovators and homeowners protect and enhance the surfaces that matter most — inside and outside the home.
-                            </p>
-                            <p>
-                                We understand that every surface has unique challenges. Whether it’s natural stone, porcelain tile, grout lines, or concrete pavers, Sure Seal delivers advanced formulations designed for maximum protection, durability and long-lasting results.
-                            </p>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                            <div className="space-y-6 text-lg text-muted-foreground leading-relaxed text-center lg:text-left">
+                                <p>
+                                    With over two decades of trusted performance, we help builders, contractors, renovators and homeowners protect and enhance the surfaces that matter most — inside and outside the home.
+                                </p>
+                                <p>
+                                    We understand that every surface has unique challenges. Whether it’s natural stone, porcelain tile, grout lines, or concrete pavers, Sure Seal delivers advanced formulations designed for maximum protection, durability and long-lasting results.
+                                </p>
+                            </div>
+                            <div className="relative">
+                                <div className="absolute -inset-4 bg-primary/5 rounded-xl -z-10 transform rotate-2"></div>
+                                <img
+                                    src="/images/about-us-meeting.png"
+                                    alt="Sure Seal Sealants Team Discussion"
+                                    className="rounded-lg shadow-xl w-full object-cover aspect-video"
+                                />
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -108,7 +118,7 @@ const About = () => {
                                 </CardContent>
                             </Card>
                         </div>
-                        
+
                         <div className="mt-12 text-center max-w-3xl mx-auto">
                             <p className="text-lg text-muted-foreground italic">
                                 "Our products strike a balance between performance and practicality — offering professional-grade protection that is easy to apply, low odour and environmentally friendly."
@@ -121,7 +131,7 @@ const About = () => {
                 <section className="py-16">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl font-bold mb-12 text-center">Why Choose Sure Seal</h2>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             <div className="flex flex-col gap-4">
                                 <div className="flex items-center gap-3 text-primary">

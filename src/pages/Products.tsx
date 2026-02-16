@@ -256,7 +256,7 @@ const Products = () => {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <Button size="sm" onClick={() => handleAddToCart(product, pricing.price.toString())}>
+                                                <Button size="sm" onClick={() => handleAddToCart(node, pricing.price.toString())}>
                                                     <ShoppingCart className="w-4 h-4 mr-2" />
                                                     Add
                                                 </Button>
