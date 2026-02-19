@@ -103,7 +103,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 20.95,
     prices: [20.95, 76.95, 326.75],
     wholesalePrices: [15.24, 55.96, 237.64],
-    image: "/images/cleaner_gts1u_group.png",
+    image: "/images/gts1u_updated.jpg",
     category: "Cleaners",
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
     codes: ["GTS1U", "GTS4U", "GTS20D"],
@@ -111,7 +111,7 @@ export const MOCK_PRODUCTS: Product[] = [
     technicalData: "/technical_data/grout,tileandstonecleaner(concrete).pdf",
     variantIds: ["43226589855809", "43226589888577", "43226589921345"],
     images: [
-      "/images/cleaner_gts1u_group.png",
+      "/images/gts1u_updated.jpg",
       "/images/cleaner_gts1u.png"
     ]
   },
