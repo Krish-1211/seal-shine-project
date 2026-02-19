@@ -27,3 +27,4 @@ dist-ssr
 .env
 .env.example
 .shopify_token
+.env.backup

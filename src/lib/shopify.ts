@@ -112,7 +112,7 @@ export const STOREFRONT_QUERY = `
 
 
 // Helper to extract numeric ID from GraphQL ID
-function getNumericId(id: string): string {
+export function getNumericId(id: string): string {
   if (!id) return '';
   try {
     // Check if it's already numeric

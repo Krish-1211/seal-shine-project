@@ -40,7 +40,15 @@ export const CartDrawer = () => {
 
   const handleCheckout = async () => {
     try {
-      await createCheckout();
+      if (user?.isWholesale && !user.email) {
+        console.error("Wholesale user missing email");
+        // Proceed anyway? The store function requires email.
+      }
+
+      await createCheckout({
+        isWholesale: user?.isWholesale || false,
+        userEmail: user?.email || ""
+      });
       const checkoutUrl = useCartStore.getState().checkoutUrl;
       console.log("Redirecting to:", checkoutUrl);
 

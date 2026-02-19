@@ -129,33 +129,6 @@ export const Navbar = () => {
 
                         <CartDrawer />
 
-                        {user ? (
-                            <div className="flex items-center gap-2">
-                                {user.isWholesale && (
-                                    <Badge variant="secondary" className="hidden md:flex bg-blue-100 text-blue-800 hover:bg-blue-100">
-                                        Wholesale
-                                    </Badge>
-                                )}
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => {
-                                        logout();
-                                        navigate("/");
-                                    }}
-                                    title="Log out"
-                                >
-                                    <LogOut className="h-5 w-5" />
-                                </Button>
-                            </div>
-                        ) : (
-                            <Link to="/login">
-                                <Button variant="ghost" size="icon" title="Log in">
-                                    <User className="h-5 w-5" />
-                                </Button>
-                            </Link>
-                        )}
-
                         {/* Mobile Menu Toggle */}
                         <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
                             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -171,38 +144,6 @@ export const Navbar = () => {
                             <Link to="/about" className="text-lg font-medium" onClick={() => setIsMenuOpen(false)}>ABOUT US</Link>
                             <Link to="/products" className="text-lg font-medium" onClick={() => setIsMenuOpen(false)}>PRODUCTS</Link>
                             <Link to="/contact" className="text-lg font-medium" onClick={() => setIsMenuOpen(false)}>CONTACT US</Link>
-
-                            {user ? (
-                                <div className="mt-4 pt-4 border-t border-border">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <span className="text-sm text-muted-foreground">{user.email}</span>
-                                        {user.isWholesale && (
-                                            <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                                                Wholesale
-                                            </Badge>
-                                        )}
-                                    </div>
-                                    <Button
-                                        variant="outline"
-                                        className="w-full justify-start"
-                                        onClick={() => {
-                                            logout();
-                                            setIsMenuOpen(false);
-                                            navigate("/");
-                                        }}
-                                    >
-                                        <LogOut className="h-4 w-4 mr-2" />
-                                        Log Out
-                                    </Button>
-                                </div>
-                            ) : (
-                                <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                                    <Button variant="outline" className="w-full justify-start mt-4">
-                                        <User className="h-4 w-4 mr-2" />
-                                        Log In
-                                    </Button>
-                                </Link>
-                            )}
 
                             <div className="relative mt-2">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

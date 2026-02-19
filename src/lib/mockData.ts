@@ -91,6 +91,8 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["GTS750U"],
     packageType: "Trigger Spray",
     technicalData: "/technical_data/grout,tileandstonecleaner(sprayandwipe).pdf",
+    variantIds: ["43918715256941"],
+    wholesaleVariantIds: ["43918715289709"],
     images: [
       "/images/cleaner_gts750u_front.png",
       "/images/cleaner_gts750u.png"
@@ -109,7 +111,8 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["GTS1U", "GTS4U", "GTS20D"],
     packageType: "Unit / Drum",
     technicalData: "/technical_data/grout,tileandstonecleaner(concrete).pdf",
-    variantIds: ["43226589855809", "43226589888577", "43226589921345"],
+    variantIds: ["43918715322477", "43918715355245", "43918715388013"],
+    wholesaleVariantIds: ["43918715420781", "43918715453549", "43918715486317"],
     images: [
       "/images/gts1u_updated.jpg",
       "/images/cleaner_gts1u.png"
@@ -128,6 +131,8 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["EFFP1U", "EFFP4U", "EFFP20D"],
     packageType: "Unit / Drum",
     technicalData: "/technical_data/epfplusremover.pdf",
+    variantIds: ["43918715519085", "43918715551853", "43918715584621"],
+    wholesaleVariantIds: ["43918715617389", "43918715650157", "43918715682925"],
     images: [
       "/images/cleaner_effp1u_group.jpg",
       "/images/eff_plus_remover.png"
@@ -146,6 +151,8 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["SC1U", "SC4U", "SC20D"],
     packageType: "Tub / Drum",
     technicalData: "/technical_data/surecleanporcelaincleaner.pdf",
+    variantIds: ["43918715715693", "43918715748461", "43918715781229"],
+    wholesaleVariantIds: ["43918715813997", "43918715846765", "43918715879533"],
     images: [
       "/images/cleaner_sc1u_group.png",
       "/images/sure_clean_porcelain_cleaner.png"
@@ -162,6 +169,8 @@ export const MOCK_PRODUCTS: Product[] = [
     sizes: ["750ML"],
     codes: ["RCSR750U"],
     packageType: "Trigger Spray",
+    variantIds: ["43918715912301"],
+    wholesaleVariantIds: ["43918715945069"],
     images: [
       "/images/cleaner_rcsr750u_front.png",
       "/images/cleaner_rcsr750u.png"
@@ -181,6 +190,8 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["QDAU"],
     packageType: "Aerosol",
     technicalData: "/technical_data/groutandtilesealer.pdf",
+    variantIds: ["43918715977837"],
+    wholesaleVariantIds: ["43918716010605"],
     images: [
       "/images/sealer_gts300a_front.png",
       "/images/aerosol_grout_tile_stone_quick_drying.png"
@@ -198,6 +209,8 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["SDAU"],
     packageType: "Aerosol",
     technicalData: "/technical_data/groutandtilesealer.pdf",
+    variantIds: ["43918716043373"],
+    wholesaleVariantIds: ["43918716076141"],
     images: [
       "/images/sealer_sdau_front.png",
       "/images/aerosol_grout_tile_stone_slow_drying.png"
@@ -215,6 +228,8 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["RCPAU"],
     packageType: "Aerosol",
     technicalData: "/technical_data/Rugandcarpetprotector.pdf",
+    variantIds: ["43918716108909"],
+    wholesaleVariantIds: ["43918716141677"],
     images: [
       "/images/sealer_rcpau_front.png",
       "/images/aerosol_rug_carpet_protector.png"
@@ -232,6 +247,8 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["TSAU"],
     packageType: "Aerosol",
     technicalData: "/technical_data/TimberSealer(areosol).pdf",
+    variantIds: ["43918716174445"],
+    wholesaleVariantIds: ["43918716207213"],
     images: [
       "/images/sealer_tsau_front.png",
       "/images/aerosol_timber_sealer.png"
@@ -251,6 +268,8 @@ export const MOCK_PRODUCTS: Product[] = [
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
     codes: ["EA1U", "EA4U", "EA20D"],
     packageType: "Unit / Drum",
+    variantIds: ["43918716239981", "43918716272749", "43918716305517"],
+    wholesaleVariantIds: ["43918716338285", "43918716371053", "43918716403821"],
     images: [
       "/images/sealer_ezyas1l_group.jpg",
       "/images/ezy_as_1_2_3_water_based_sealer.png"
@@ -269,6 +288,8 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["CONS1U", "CONS4U", "CONS20D"],
     packageType: "Unit / Drum",
     technicalData: "/technical_data/consolidatorsealer.pdf",
+    variantIds: ["43918716436589", "43918716469357", "43918716502125"],
+    wholesaleVariantIds: ["43918716534893", "43918716567661", "43918716600429"],
     images: [
       "/images/sealer_sd1u_wb_group.jpg",
       "/images/consolidator_sealer_water_based.png"
@@ -287,6 +308,8 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["TS1U", "TS4U", "TS20D"],
     packageType: "Unit / Drum",
     technicalData: "/technical_data/Timbersealer(solvent).pdf",
+    variantIds: ["43918716633197", "43918716665965", "43918716698733"],
+    wholesaleVariantIds: ["43918716731501", "43918716764269", "43918716797037"],
     images: [
       "/images/sealer_24p1u_s_front.jpg",
       "/images/timber_sealer_solvent.png"
@@ -305,6 +328,8 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["QD1U", "QD4U", "QD20D"],
     packageType: "Unit / Drum",
     technicalData: "/technical_data/groutandtilesealer(quick drying).pdf",
+    variantIds: ["43918716829805", "43918716862573", "43918716895341"],
+    wholesaleVariantIds: ["43918716928109", "43918716960877", "43918716993645"],
     images: [
       "/images/sealer_qd1u_s_group.jpg",
       "/images/grout_tile_stone_sealer_quick_drying.png"
@@ -323,6 +348,8 @@ export const MOCK_PRODUCTS: Product[] = [
     codes: ["SD1U", "SD4U", "SD20D"],
     packageType: "Unit / Drum",
     technicalData: "/technical_data/groutandtilesealer(slow drying).pdf",
+    variantIds: ["43918717026413", "43918717059181", "43918717091949"],
+    wholesaleVariantIds: ["43918717124717", "43918717157485", "43918717190253"],
     images: [
       "/images/sealer_sd1u_s_group.jpg",
       "/images/grout_tile_stone_sealer_slow_drying.png"
@@ -340,7 +367,8 @@ export const MOCK_PRODUCTS: Product[] = [
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
     codes: ["24P1U", "24P4U", "24P20D"],
     packageType: "Unit / Drum",
-    variantIds: ["43225363513409"],
+    variantIds: ["43918717223021", "43918717255789", "43918717288557"],
+    wholesaleVariantIds: ["43918717321325", "43918717354093", "43918717386861"],
     images: [
       "/images/sealer_24p1u_wb_group.jpg",
       "/images/24_7_plus_stone_concrete_sealer.png"
@@ -358,8 +386,8 @@ export const MOCK_PRODUCTS: Product[] = [
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
     codes: ["PP1U", "PP4U", "PP20D"],
     packageType: "Bottle / Drum",
-    variantIds: ["43258412171329", "43258412204097", "43258412236865"],
-    wholesaleVariantIds: ["43258412269633", "43258412302401", "43258412335169"],
+    variantIds: ["43918717419629", "43918717452397", "43918717485165"],
+    wholesaleVariantIds: ["43918717517933", "43918717550701", "43918717583469"],
     images: [
       "/images/sealer_pp1u_group.jpg",
       "/images/premium_plus_sealer.png"

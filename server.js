@@ -249,6 +249,83 @@ app.post("/api/create-wholesale-checkout", async (req, res) => {
     }
 });
 
+// Sync Wholesale Inventory (Retail -> Wholesale)
+app.post("/api/sync-wholesale-inventory", async (req, res) => {
+    try {
+        const accessToken = getShopifyAccessToken();
+        const shop = process.env.SHOPIFY_SHOP_DOMAIN || "sure-seal-sealants.myshopify.com";
+        const headers = { "X-Shopify-Access-Token": accessToken, "Content-Type": "application/json" };
+
+        console.log("Starting Wholesale Inventory Sync...");
+
+        // 1. Get Location (Assume primary)
+        const locRes = await axios.get(`https://${shop}/admin/api/2024-01/locations.json`, { headers });
+        const primaryLocation = locRes.data.locations[0];
+        if (!primaryLocation) throw new Error("No location found in Shopify.");
+
+        // 2. Fetch all products
+        const productsRes = await axios.get(`https://${shop}/admin/api/2024-01/products.json?limit=250`, { headers });
+        const products = productsRes.data.products;
+
+        let updatedCount = 0;
+        const updates = [];
+
+        // 3. Iterate and match
+        for (const product of products) {
+            const variants = product.variants;
+
+            // Filter Retail vs Wholesale
+            const retailVariants = variants.filter(v => !v.title.toLowerCase().includes("wholesale") && !v.sku.endsWith("-W"));
+            const wholesaleVariants = variants.filter(v => v.title.toLowerCase().includes("wholesale") || v.sku.endsWith("-W"));
+
+            for (const retail of retailVariants) {
+                // Find matching wholesale variant by Title convention
+                const match = wholesaleVariants.find(w => {
+                    const retailTitle = (retail.option1 || "").trim();
+                    const wholesaleTitle = (w.option1 || "").replace(" Wholesale", "").trim();
+                    return wholesaleTitle === retailTitle;
+                });
+
+                if (match) {
+                    // Check if inventory differs
+                    const retailQty = retail.inventory_quantity;
+                    const wholesaleQty = match.inventory_quantity;
+
+                    if (retailQty !== wholesaleQty) {
+                        console.log(`Syncing ${product.title} [${retail.title}] Qty: ${retailQty} -> Updating Wholesale [${match.title}]`);
+
+                        updates.push({
+                            location_id: primaryLocation.id,
+                            inventory_item_id: match.inventory_item_id,
+                            available: retailQty
+                        });
+                    }
+                }
+            }
+        }
+
+        // 4. Update Inventory Levels
+        // Note: 'inventory_levels/set.json' sets the "available" count.
+        for (const update of updates) {
+            try {
+                await axios.post(`https://${shop}/admin/api/2024-01/inventory_levels/set.json`, update, { headers });
+                updatedCount++;
+                // Small delay to avoid rate limits
+                await new Promise(r => setTimeout(r, 100));
+            } catch (err) {
+                console.error(`Failed to update inventory for item ${update.inventory_item_id}:`, err.message);
+            }
+        }
+
+        console.log(`Sync Complete. Updated ${updatedCount} variants.`);
+        res.json({ success: true, updated: updatedCount, message: `Synced ${updatedCount} wholesale variants` });
+
+    } catch (error) {
+        console.error("Sync Error:", error.response?.data || error.message);
+        res.status(500).json({ error: "Sync failed" });
+    }
+});
+
 // Root Health Check (Required: do not redirect)
 app.get('/', (req, res) => {
     res.status(200).send("Seal Shine Backend is Running. OAuth endpoint: /auth?shop=sure-seal-sealants.myshopify.com");
