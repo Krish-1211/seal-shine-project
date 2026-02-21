@@ -392,5 +392,20 @@ export const MOCK_PRODUCTS: Product[] = [
       "/images/sealer_pp1u_group.jpg",
       "/images/premium_plus_sealer.png"
     ]
+  },
+  {
+    id: "DEMO-001",
+    title: "Demo Product",
+    description: "Special testing product for payment gateway verification.",
+    price: 1.00,
+    wholesalePrices: [0.73],
+    image: "/images/aerosols.png",
+    category: "Sealers",
+    sizes: ["Unit"],
+    codes: ["DEMO-001"],
+    packageType: "Testing",
+    variantIds: ["44219300020333"],
+    wholesaleVariantIds: ["44219300020333"],
+    images: ["/images/aerosols.png"]
   }
 ];
