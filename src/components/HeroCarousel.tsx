@@ -33,15 +33,20 @@ export const HeroCarousel = () => {
                 >
                     <CarouselContent className="-ml-0">
                         {SITE_CONTENT.offers.map((offer) => (
-                            <CarouselItem key={offer.id} className="pl-0 basis-full">
+                            <CarouselItem key={offer.id} className="pl-0 basis-full group">
                                 <div className="p-0 h-full">
-                                    <Card className="border-none shadow-lg bg-gradient-to-r from-primary/90 to-primary text-primary-foreground overflow-hidden h-[500px] rounded-none">
-                                        <CardContent className="flex flex-col md:flex-row items-center p-6 md:p-10 gap-6 h-full">
-                                            <div className="flex-1 space-y-4 text-center md:text-left">
-                                                <Badge variant="secondary" className="mb-2">
+                                    <Card className="border-none shadow-2xl bg-[#002f5d] text-primary-foreground overflow-hidden h-[500px] rounded-none relative">
+                                        {/* Abstract background pattern for premium feel */}
+                                        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                                        <div className="absolute -right-20 -top-20 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl"></div>
+                                        <div className="absolute -left-20 -bottom-20 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
+
+                                        <CardContent className="flex flex-col md:flex-row items-center p-8 md:p-16 gap-8 h-full relative z-10">
+                                            <div className="flex-1 space-y-6 text-center md:text-left">
+                                                <Badge variant="outline" className="mb-2 text-white border-white/30 px-3 py-1 text-xs uppercase tracking-widest font-semibold bg-white/10 backdrop-blur-sm">
                                                     Special Offer
                                                 </Badge>
-                                                <h2 className="text-3xl md:text-5xl font-bold tracking-tight">
+                                                <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight">
                                                     {offer.title}
                                                 </h2>
                                                 <p className="text-lg text-primary-foreground/90">
@@ -58,9 +63,12 @@ export const HeroCarousel = () => {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="w-full md:w-1/3 aspect-video bg-white/10 rounded-lg flex items-center justify-center">
-                                                {/* Placeholder for offer image */}
-                                                <span className="text-white/50 font-bold text-xl">Offer Image</span>
+                                            <div className="w-full md:w-1/2 h-64 md:h-full flex items-center justify-center p-4">
+                                                <img
+                                                    src={offer.image}
+                                                    alt={offer.title}
+                                                    className="max-h-full max-w-full object-contain drop-shadow-2xl transform group-hover:scale-105 transition-transform duration-500"
+                                                />
                                             </div>
                                         </CardContent>
                                     </Card>

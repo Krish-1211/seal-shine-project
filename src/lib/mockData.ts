@@ -36,24 +36,16 @@ export const SITE_CONTENT = {
   offers: [
     {
       id: 1,
-      title: "20% OFF All Grout Sealers",
-      description: "Limited time offer. Protect your tiles today!",
-      image: "/images/aerosols.png",
-      code: "GROUT20"
+      title: "Free Shipping on Orders Over $100",
+      description: "Fast Australia-wide delivery for all our premium surface protection products.",
+      image: "/images/cleaner_gts1u_group.png",
+      code: "FREESHIP"
     },
     {
       id: 2,
-      title: "New Stone Care Kit",
-      description: "Complete protection for your natural stone surfaces.",
-      image: "/images/sealers_2.png",
-      code: "NEWSTONE"
-    },
-    {
-      id: 3,
-      title: "Free Shipping on Orders Over $100",
-      description: "Australia-wide delivery.",
-      image: "/images/cleaners.png",
-      code: "FREESHIP"
+      title: "World's First Aerosol Sealants",
+      description: "Our award-winning, quick-drying aerosol sealer revolutionized surface protection.",
+      image: "/images/aerosols.png",
     }
   ]
 };
