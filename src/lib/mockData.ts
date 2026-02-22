@@ -38,14 +38,14 @@ export const SITE_CONTENT = {
       id: 1,
       title: "Free Shipping on Orders Over $100",
       description: "Fast Australia-wide delivery for all our premium surface protection products.",
-      image: "/images/cleaner_gts1u_group.png",
+      image: "/images/free-shipping-hero.png",
       code: "FREESHIP"
     },
     {
       id: 2,
       title: "World's First Aerosol Sealants",
       description: "Our award-winning, quick-drying aerosol sealer revolutionized surface protection.",
-      image: "/images/aerosols.png",
+      image: "/images/aerosol-hero.png",
     }
   ]
 };
