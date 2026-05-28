@@ -9,7 +9,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 
 const CustomerLogin = () => {
-    const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const { login } = useUser();
     const navigate = useNavigate();
@@ -19,15 +19,10 @@ const CustomerLogin = () => {
 
         // Mock authentication
         if (password.length > 0) {
-            const success = login(email, password);
-            if (!success) {
-                toast.error("Invalid credentials", {
-                    description: "Please check your email and password."
-                });
-                return;
-            }
+            login(username);
 
-            if (email === "wholesale@example.com") {
+            const isWholesale = username.toLowerCase() !== "admin" && username.toLowerCase() !== "retail";
+            if (isWholesale) {
                 toast.success("Welcome back, Wholesale Partner!", {
                     description: "You now have access to wholesale pricing."
                 });
@@ -52,18 +47,18 @@ const CustomerLogin = () => {
                     <div className="text-center">
                         <h2 className="text-2xl font-bold tracking-tight">Customer Login</h2>
                         <p className="text-sm text-muted-foreground mt-2">
-                            Use 'wholesale@example.com' to test wholesale pricing.
+                            Use any generated username (e.g. 'supertech') to test wholesale pricing.
                         </p>
                     </div>
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
+                            <Label htmlFor="username">Username</Label>
                             <Input
-                                id="email"
-                                type="email"
-                                placeholder="name@example.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                id="username"
+                                type="text"
+                                placeholder="Username"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 required
                             />
                         </div>

@@ -24,40 +24,34 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Check local storage on mount
         const storedUser = localStorage.getItem("customerUser");
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                if (parsedUser && parsedUser.email) {
+                    const username = parsedUser.email.toLowerCase();
+                    const shouldBeWholesale = username !== "admin" && username !== "retail";
+                    if (parsedUser.isWholesale !== shouldBeWholesale) {
+                        parsedUser.isWholesale = shouldBeWholesale;
+                        parsedUser.tags = shouldBeWholesale ? ["wholesale"] : [];
+                        localStorage.setItem("customerUser", JSON.stringify(parsedUser));
+                    }
+                }
+                setUser(parsedUser);
+            } catch (e) {
+                console.error("Error parsing stored user:", e);
+            }
         }
         setIsLoading(false);
     }, []);
 
-    const login = (email: string, password?: string) => {
-        // Enforce specific credentials for wholesale
-        if (email === "wholesale@example.com") {
-            if (password !== "wholesale") {
-                // Incorrect password for the specific wholesale account
-                return false;
-            }
-            // Correct credentials
-            const newUser: User = {
-                email,
-                name: "Wholesale Partner",
-                tags: ["wholesale"],
-                isWholesale: true
-            };
-            setUser(newUser);
-            localStorage.setItem("customerUser", JSON.stringify(newUser));
-            return true;
-        }
-
-        // Prevent other random "wholesale" emails from getting wholesale status automatically if we want to be strict
-        // The user said "only the email wholesale@example.com ... can access that page"
-        // So we should probably prevent isWholesale from being true for anyone else
-
-        const isWholesale = false; // logic changed: strict check above
-        const tags: string[] = [];
+    const login = (email: string) => {
+        // Mock login logic
+        // Treat any username as a wholesale account unless it is 'admin' or 'retail'
+        const isWholesale = email.toLowerCase() !== "admin" && email.toLowerCase() !== "retail";
+        const tags = isWholesale ? ["wholesale"] : [];
 
         const newUser: User = {
             email,
-            name: email.split("@")[0],
+            name: email,
             tags,
             isWholesale
         };
