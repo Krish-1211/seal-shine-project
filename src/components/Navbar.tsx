@@ -1,12 +1,10 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { ShieldCheck, Search, Menu, X, User, LogOut } from "lucide-react";
+import { ShieldCheck, Search, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CartDrawer } from "@/components/CartDrawer";
 import { Input } from "@/components/ui/input";
 import { useShopifyProducts } from "@/hooks/useShopify";
-import { useUser } from "@/contexts/UserContext";
-import { Badge } from "@/components/ui/badge";
 
 import logo from "@/assets/logo.png";
 
@@ -18,7 +16,6 @@ export const Navbar = () => {
     const { data: products } = useShopifyProducts();
     const [showSuggestions, setShowSuggestions] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
-    const { user, logout } = useUser();
 
     const suggestions = useMemo(() => {
         if (!searchQuery.trim() || !products) return [];
@@ -129,25 +126,6 @@ export const Navbar = () => {
 
                         <CartDrawer />
 
-                        {user ? (
-                            <div className="hidden md:flex items-center gap-2">
-                                <Badge variant="secondary" className="flex items-center gap-1.5 py-1.5 px-3 bg-secondary/15 text-secondary border-secondary/20 font-semibold">
-                                    <User className="h-3.5 w-3.5" />
-                                    <span className="max-w-[100px] truncate">{user.name}</span>
-                                    {user.isWholesale && <span className="text-[10px] bg-secondary text-secondary-foreground px-1 rounded ml-1 font-bold">Wholesale</span>}
-                                </Badge>
-                                <Button variant="ghost" size="icon" onClick={logout} title="Log Out" className="text-muted-foreground hover:text-red-500">
-                                    <LogOut className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        ) : (
-                            <Link to="/login" className="hidden md:block">
-                                <Button variant="outline" className="border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground font-semibold flex items-center gap-2 px-4 py-2 text-sm transition-all duration-300 shadow-sm hover:shadow">
-                                    <User className="h-4 w-4" />
-                                    Wholesale Login
-                                </Button>
-                            </Link>
-                        )}
 
                         {/* Mobile Menu Toggle */}
                         <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -170,25 +148,7 @@ export const Navbar = () => {
                                 <Input placeholder="Search products..." className="pl-9" />
                             </div>
 
-                            {user ? (
-                                <div className="flex flex-col gap-2 mt-2 pt-4 border-t border-border">
-                                    <div className="flex items-center gap-2 px-1">
-                                        <Badge variant="secondary" className="flex items-center gap-1.5 py-1 px-3 bg-secondary/15 text-secondary border-secondary/20 font-semibold">
-                                            <User className="h-3.5 w-3.5" />
-                                            <span>{user.name}</span>
-                                            {user.isWholesale && <span className="text-[10px] bg-secondary text-secondary-foreground px-1 rounded ml-1 font-bold">Wholesale</span>}
-                                        </Badge>
-                                    </div>
-                                    <Button variant="ghost" className="justify-start text-red-500 hover:bg-red-50" onClick={() => { logout(); setIsMenuOpen(false); }}>
-                                        <LogOut className="mr-2 h-4 w-4" />
-                                        Log Out
-                                    </Button>
-                                </div>
-                            ) : (
-                                <Link to="/login" className="text-lg font-medium pt-2 border-t border-border" onClick={() => setIsMenuOpen(false)}>
-                                    Wholesale Login
-                                </Link>
-                            )}
+
                         </nav>
                     </div>
                 )}
