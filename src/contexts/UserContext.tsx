@@ -27,11 +27,10 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
                 const parsedUser = JSON.parse(storedUser);
                 if (parsedUser && parsedUser.email) {
-                    const username = parsedUser.email.toLowerCase();
-                    const shouldBeWholesale = username !== "admin" && username !== "retail";
+                    const shouldBeWholesale = false;
                     if (parsedUser.isWholesale !== shouldBeWholesale) {
                         parsedUser.isWholesale = shouldBeWholesale;
-                        parsedUser.tags = shouldBeWholesale ? ["wholesale"] : [];
+                        parsedUser.tags = [];
                         localStorage.setItem("customerUser", JSON.stringify(parsedUser));
                     }
                 }
@@ -46,8 +45,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const login = (email: string) => {
         // Mock login logic
         // Treat any username as a wholesale account unless it is 'admin' or 'retail'
-        const isWholesale = email.toLowerCase() !== "admin" && email.toLowerCase() !== "retail";
-        const tags = isWholesale ? ["wholesale"] : [];
+        const isWholesale = false;
+        const tags: string[] = [];
 
         const newUser: User = {
             email,

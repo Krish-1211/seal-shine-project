@@ -28,3 +28,4 @@ dist-ssr
 .env.example
 .shopify_token
 .env.backup
+.vercel

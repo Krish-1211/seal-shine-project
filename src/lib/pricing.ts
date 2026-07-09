@@ -14,6 +14,7 @@ export interface PriceResult {
 // BUT we need to support "variantIndex" now as planned.
 
 export const getProductPrice = (product: Product, isWholesale: boolean, variantIndex?: number): PriceResult => {
+    isWholesale = false; // Always force retail pricing
     // Standard retail price calculation
     let currentRetailPrice = product.price;
     if (variantIndex !== undefined && product.prices && product.prices[variantIndex] !== undefined) {
