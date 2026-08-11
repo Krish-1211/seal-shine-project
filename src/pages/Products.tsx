@@ -237,10 +237,10 @@ const Products = () => {
                                             </p>
 
                                             {/* Display options if any (e.g. sizes) - Simplified for grid */}
-                                            {((node.variants?.edges?.length || 0) > 1 || (node.sizes?.length || 0) > 1) && (
+                                            {((node.sizes?.length || 0) > 1 || (node.options?.find(o => o.name === "Size")?.values?.length || 0) > 1) && (
                                                 <div className="flex flex-wrap gap-1 mb-4">
                                                     <Badge variant="secondary" className="text-xs">
-                                                        {node.variants?.edges?.length || node.sizes?.length || 0} sizes
+                                                        {node.sizes?.length || node.options?.find(o => o.name === "Size")?.values?.length || 0} sizes
                                                     </Badge>
                                                 </div>
                                             )}
