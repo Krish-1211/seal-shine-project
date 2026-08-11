@@ -12,7 +12,19 @@ export const useShopifyProducts = () => {
 
         const data = await storefrontApiRequest(STOREFRONT_QUERY, { first: 20 });
         if (data?.data?.products?.edges?.length > 0) {
-          return data.data.products.edges;
+          return data.data.products.edges.map((edge: any) => {
+            const product = edge.node || edge;
+            if (product.variants?.edges) {
+              product.variants.edges = product.variants.edges.map((vEdge: any) => ({
+                ...vEdge,
+                node: {
+                  ...vEdge.node,
+                  availableForSale: true
+                }
+              }));
+            }
+            return edge;
+          });
         }
         console.warn("Shopify API returned no products, falling back to mock data.");
         throw new Error("No products found");
@@ -159,7 +171,17 @@ export const useShopifyProduct = (handle: string) => {
 
         const data = await storefrontApiRequest(query, { handle });
         if (data?.data?.productByHandle) {
-          return data.data.productByHandle as ShopifyProduct["node"];
+          const product = data.data.productByHandle;
+          if (product?.variants?.edges) {
+            product.variants.edges = product.variants.edges.map((edge: any) => ({
+              ...edge,
+              node: {
+                ...edge.node,
+                availableForSale: true
+              }
+            }));
+          }
+          return product as ShopifyProduct["node"];
         }
       } catch (error) {
         console.warn("Error fetching product from Shopify, falling back to mock:", error);
