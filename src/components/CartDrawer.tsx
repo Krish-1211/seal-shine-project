@@ -173,11 +173,27 @@ export const CartDrawer = () => {
               </div>
 
               <div className="flex-shrink-0 space-y-4 pt-4 border-t bg-background">
-                <div className="flex justify-between items-center">
+                {items.length > 0 && (
+                  <>
+                    <div className="flex justify-between items-center text-sm text-muted-foreground">
+                      <span>Subtotal</span>
+                      <span>
+                        {items[0]?.price.currencyCode || "$"} ${totalPrice.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm text-muted-foreground">
+                      <span>Shipping</span>
+                      <span>
+                        {totalPrice >= 100 ? "FREE" : `${items[0]?.price.currencyCode || "$"} $10.00`}
+                      </span>
+                    </div>
+                  </>
+                )}
+                <div className="flex justify-between items-center pt-2 border-t">
                   <span className="text-lg font-semibold">Total</span>
                   <span className="text-xl font-bold">
                     {items[0]?.price.currencyCode || "$"} $
-                    {totalPrice.toFixed(2)}
+                    {(totalPrice + (totalPrice >= 100 ? 0 : 10)).toFixed(2)}
                   </span>
                 </div>
 
