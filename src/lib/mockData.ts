@@ -137,7 +137,7 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 31.95,
     prices: [31.95, 114.70, 393.75],
     wholesalePrices: [22.18, 79.64, 273.38],
-    image: "/images/cleaner_sc1u_group.png",
+    image: "/images/sure_clean_porcelain_cleaner_new.png",
     category: "Cleaners",
     sizes: ["1 LTR", "4 LTR", "20 LTR"],
     codes: ["SC1U", "SC4U", "SC20D"],
@@ -146,8 +146,7 @@ export const MOCK_PRODUCTS: Product[] = [
     variantIds: ["43918715715693", "43918715748461", "43918715781229"],
     wholesaleVariantIds: ["43918715813997", "43918715846765", "43918715879533"],
     images: [
-      "/images/cleaner_sc1u_group.png",
-      "/images/sure_clean_porcelain_cleaner.png"
+      "/images/sure_clean_porcelain_cleaner_new.png"
     ]
   },
   {
