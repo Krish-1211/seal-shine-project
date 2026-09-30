@@ -9,50 +9,97 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Price mapping of SKU (Product Order Code) -> New Retail Price
+// Price mapping of SKU (Product Order Code) -> New Retail Price (Inc. GST)
+// and Wholesale SKU (ending with -W) -> New Wholesale Price (Excl. GST)
+// Effective 1st of October 2026
 const PRICE_MAP = {
-    // Cleaners
-    "GTS750U": 18.40,
-    "GTS1U": 21.95,
-    "GTS4U": 80.60,
-    "GTS20D": 342.25,
-    "EFFP1U": 19.30,
-    "EFFP4U": 59.34,
-    "EFFP20D": 250.95,
-    "SC1U": 31.95,
-    "SC4U": 114.70,
+    // Cleaners - Retail
+    "GTS750U": 19.35,
+    "GTS1U": 23.05,
+    "GTS4U": 84.60,
+    "GTS20D": 359.20,
+    "EFFP1U": 20.25,
+    "EFFP4U": 62.30,
+    "EFFP20D": 263.40,
+    "SC1U": 33.55,
+    "SC4U": 120.40,
     "SC20D": 393.75,
-    "RCSR750U": 18.59,
+    "RCSR750U": 19.55,
 
-    // Aerosols
-    "QDAU": 36.95,
-    "SDAU": 37.95,
-    "RCPAU": 30.90,
-    "TSAU": 36.90,
-    "300A GR Aero": 37.95,
+    // Cleaners - Wholesale (Excl. GST)
+    "GTS750U-W": 10.88,
+    "GTS1U-W": 12.70,
+    "GTS4U-W": 45.35,
+    "GTS20D-W": 181.40,
+    "EFFP1U-W": 10.78,
+    "EFFP4U-W": 32.99,
+    "EFFP20D-W": 145.39,
+    "SC1U-W": 18.01,
+    "SC4U-W": 61.56,
+    "SC20D-W": 242.40,
+    "RCSR750U-W": 10.88,
 
-    // Sealers
-    "EA1U": 36.80,
-    "EA4U": 110.60,
-    "EA20D": 339.90,
-    "CONS1U": 73.85,
-    "CONS4U": 248.90,
-    "CONS20D": 1025.50,
-    "TS1U": 59.95,
-    "TS4U": 184.35,
-    "TS20D": 783.50,
-    "QD1U": 60.95,
-    "QD4U": 184.95,
-    "QD20D": 787.60,
-    "SD1U": 74.30,
-    "SD4U": 223.20,
-    "SD20D": 923.90,
-    "24P1U": 54.95,
-    "24P4U": 178.00,
-    "24P20D": 885.60,
-    "PP1U": 76.99,
-    "PP4U": 250.88,
-    "PP20D": 1116.37
+    // Aerosols - Retail
+    "QDAU": 38.79,
+    "SDAU": 39.85,
+    "RCPAU": 32.45,
+    "TSAU": 38.75,
+    "300A GR Aero": 39.85,
+    "300AGRAero": 39.85,
+
+    // Aerosols - Wholesale (Excl. GST)
+    "QDAU-W": 20.51,
+    "SDAU-W": 21.28,
+    "RCPAU-W": 19.79,
+    "TSAU-W": 20.78,
+    "300A GR Aero-W": 21.00,
+    "300AGRAero-W": 21.00,
+
+    // Sealers - Retail
+    "EA1U": 38.65,
+    "EA4U": 116.10,
+    "EA20D": 356.75,
+    "CONS1U": 77.50,
+    "CONS4U": 261.25,
+    "CONS20D": 1076.30,
+    "TS1U": 62.95,
+    "TS4U": 193.50,
+    "TS20D": 822.30,
+    "QD1U": 63.99,
+    "QD4U": 194.15,
+    "QD20D": 826.60,
+    "SD1U": 77.99,
+    "SD4U": 234.25,
+    "SD20D": 969.65,
+    "24P1U": 57.70,
+    "24P4U": 186.85,
+    "24P20D": 929.45,
+    "PP1U": 80.80,
+    "PP4U": 263.30,
+    "PP20D": 1171.65,
+
+    // Sealers - Wholesale (Excl. GST)
+    "EA1U-W": 20.94,
+    "EA4U-W": 62.64,
+    "EA20D-W": 244.27,
+    "CONS1U-W": 38.70,
+    "CONS4U-W": 128.19,
+    "CONS20D-W": 538.13,
+    "TS1U-W": 33.75,
+    "TS4U-W": 111.64,
+    "TS20D-W": 406.32,
+    "QD1U-W": 33.94,
+    "QD4U-W": 114.06,
+    "QD20D-W": 413.25,
+    "SD1U-W": 39.36,
+    "SD4U-W": 129.63,
+    "SD20D-W": 473.27,
+    "24P1U-W": 31.74,
+    "24P4U-W": 109.11,
+    "24P20D-W": 473.27,
+    "PP1U-W": 43.87,
+    "PP4U-W": 144.29,
+    "PP20D-W": 594.48
 };
 
 async function run() {
@@ -98,13 +145,6 @@ async function run() {
                 const sku = variant.sku;
                 if (!sku) {
                     console.log(`  - Variant "${variant.title}" has no SKU. Skipping.`);
-                    continue;
-                }
-
-                // Check if this is a wholesale variant (ends with -W or has "Wholesale" in name)
-                const isWholesale = sku.endsWith('-W') || variant.title.toLowerCase().includes('wholesale');
-                if (isWholesale) {
-                    console.log(`  - Variant "${variant.title}" (${sku}) is a Wholesale variant. Skipping.`);
                     continue;
                 }
 
