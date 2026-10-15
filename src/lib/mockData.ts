@@ -36,7 +36,7 @@ export const SITE_CONTENT = {
   offers: [
     {
       id: 1,
-      title: "Free Shipping on Orders Over $100",
+      title: "Free Shipping for All Orders",
       description: "Fast Australia-wide delivery for all our premium surface protection products.",
       image: "/images/free-shipping-hero.png",
       code: "FREESHIP"
